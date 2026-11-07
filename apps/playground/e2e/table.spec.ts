@@ -43,10 +43,12 @@ test('reorders columns by dragging the handle', async ({ page }) => {
   const target = page.getByRole('columnheader', { name: /Logins/ });
   const from = await centre(handle);
   const to = await centre(target);
-  // Drag the way a person does: press, start moving, travel, settle over the target, release.
-  await page.mouse.move(from.x, from.y);
+  // Drag the way a person does: press, start moving until the drag has visibly begun, travel,
+  // settle over the target, release. Waiting for the floating copy keeps slow machines in step.
+  await handle.hover();
   await page.mouse.down();
-  await page.mouse.move(from.x + 10, from.y, { steps: 5 });
+  await page.mouse.move(from.x + 12, from.y, { steps: 6 });
+  await expect(page.locator('.tv-drag-overlay-label')).toBeVisible();
   await page.mouse.move(to.x, to.y, { steps: 40 });
   await page.mouse.move(to.x + 4, to.y, { steps: 4 });
   await page.waitForTimeout(250);
