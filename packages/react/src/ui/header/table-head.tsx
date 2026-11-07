@@ -1,8 +1,5 @@
-import { DragDropProvider } from '@dnd-kit/react';
-import { isSortable } from '@dnd-kit/react/sortable';
 import type { ReactElement } from 'react';
 
-import { moveColumn } from '../../layout/move-column.ts';
 import type { TanStackColumn } from '../../table/tanstack.type.ts';
 import { SELECT_COLUMN_ID } from '../../table/to-column-defs.ts';
 import { Checkbox } from '../common/checkbox.tsx';
@@ -13,8 +10,8 @@ import { pinProps } from '../common/pin-props.ts';
 import { HeaderCell } from './header-cell.tsx';
 
 /**
- * The header row. Columns can be dragged within their region; a drop writes the new order to the
- * layout, which TanStack and storage then follow.
+ * The header row. Each header can be dragged within its region; `ColumnDrag` around the table
+ * handles the drop.
  * @returns The `<thead>`.
  */
 export function TableHead(): ReactElement {
@@ -23,9 +20,6 @@ export function TableHead(): ReactElement {
   const headersById = new Map(
     model.table.getFlatHeaders().map((header) => [header.column.id, header]),
   );
-  const visibleIds = (region: 'start' | 'center' | 'end'): string[] =>
-    regions[region].map((column) => column.id).filter((id) => id !== SELECT_COLUMN_ID);
-
   const renderRegion = (
     region: 'start' | 'center' | 'end',
     columns: TanStackColumn<unknown>[],
@@ -54,24 +48,14 @@ export function TableHead(): ReactElement {
   };
 
   return (
-    <DragDropProvider
-      onDragEnd={(event) => {
-        const { source } = event.operation;
-        if (event.canceled || !isSortable(source)) return;
-        const region = source.group as 'start' | 'center' | 'end';
-        const move = { visible: visibleIds(region), from: source.initialIndex, to: source.index };
-        model.setLayout((layout) => moveColumn(layout, region, move));
-      }}
-    >
-      <thead className="tv-thead">
-        <tr className={cx('tv-tr', model.classNames.headerRow)}>
-          {renderRegion('start', regions.start)}
-          {renderRegion('center', regions.center)}
-          <th className="tv-filler" aria-hidden="true" />
-          {renderRegion('end', regions.end)}
-        </tr>
-      </thead>
-    </DragDropProvider>
+    <thead className="tv-thead">
+      <tr className={cx('tv-tr', model.classNames.headerRow)}>
+        {renderRegion('start', regions.start)}
+        {renderRegion('center', regions.center)}
+        <th className="tv-filler" aria-hidden="true" />
+        {renderRegion('end', regions.end)}
+      </tr>
+    </thead>
   );
 }
 

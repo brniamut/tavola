@@ -735,10 +735,37 @@
     color: var(--tv-accent);
   }
 
-  .tv-th[data-dragging] {
-    z-index: 4;
-    opacity: 0.9;
+  /* While a header is dragged, its place in the row stays empty and a floating copy follows the
+     pointer. */
+  .tv-th[data-dragging] > * {
+    opacity: 0.35;
+  }
+
+  .tv-drag-overlay {
+    z-index: 60;
+  }
+
+  .tv-drag-overlay-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: var(--tv-row-height, 40px);
+    padding: 0 14px 0 10px;
+    border: 1px solid var(--tv-border-strong, #d6ccbd);
+    border-radius: var(--tv-radius-control, 6px);
+    background: var(--tv-header-bg, #f6f1ea);
+    color: var(--tv-text, #2a2420);
     box-shadow: var(--tv-shadow);
+    font-family: var(--tv-font, inherit);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: grabbing;
+  }
+
+  .tv-drag-overlay-label .tv-icon {
+    width: 12px;
+    color: var(--tv-accent, #a84b25);
   }
 
   @media (hover: none) {

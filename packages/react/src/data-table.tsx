@@ -8,6 +8,7 @@ import { cx } from './ui/common/cx.ts';
 import { ModelContext } from './ui/common/model-context.ts';
 import { pinOffsetVariables } from './ui/common/pin-offset-variables.ts';
 import { useScrollEdges } from './ui/common/use-scroll-edges.ts';
+import { ColumnDrag } from './ui/header/column-drag.tsx';
 import { TableHead } from './ui/header/table-head.tsx';
 import { FilterChips } from './ui/toolbar/filter-chips.tsx';
 import { PaginationBar } from './ui/toolbar/pagination-bar.tsx';
@@ -57,27 +58,29 @@ export function DataTable<TRow>(props: DataTableProps<TRow>): ReactElement {
         </div>
         <SelectionBar />
         <div ref={scrollerRef} className={cx('tv-scroller', classNames.scroller)}>
-          <table
-            className={cx('tv-table', classNames.table)}
-            aria-label={props.label}
-            aria-rowcount={total ?? -1}
-            style={{
-              ...pinOffsetVariables(regions.start, regions.end),
-              minWidth: table.getTotalSize(),
-            }}
-          >
-            <colgroup>
-              {columns.map((column) => (
-                <col key={column.id} style={{ width: column.getSize() }} />
-              ))}
-              <col />
-              {regions.end.map((column) => (
-                <col key={column.id} style={{ width: column.getSize() }} />
-              ))}
-            </colgroup>
-            <TableHead />
-            <TableBody />
-          </table>
+          <ColumnDrag>
+            <table
+              className={cx('tv-table', classNames.table)}
+              aria-label={props.label}
+              aria-rowcount={total ?? -1}
+              style={{
+                ...pinOffsetVariables(regions.start, regions.end),
+                minWidth: table.getTotalSize(),
+              }}
+            >
+              <colgroup>
+                {columns.map((column) => (
+                  <col key={column.id} style={{ width: column.getSize() }} />
+                ))}
+                <col />
+                {regions.end.map((column) => (
+                  <col key={column.id} style={{ width: column.getSize() }} />
+                ))}
+              </colgroup>
+              <TableHead />
+              <TableBody />
+            </table>
+          </ColumnDrag>
         </div>
         <PaginationBar />
       </div>
