@@ -1,0 +1,132 @@
+{
+  // Lint for Tavola. Correctness problems fail; questionable patterns warn, and CI treats warnings
+  // as failures too (`--deny-warnings`). The sizes below keep functions small enough to review.
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "jsx-a11y", "jsdoc"],
+  "jsPlugins": ["./tooling/oxlint-plugin-tavola/index.js"],
+  "options": { "typeAware": true },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    // Types: no escape hatches, explicit public signatures, exhaustive unions.
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/return-await": ["error", "in-try-catch"],
+    "typescript/consistent-type-imports": "error",
+    "typescript/explicit-module-boundary-types": "error",
+    "typescript/consistent-return": "off",
+    // Bridging the user's row type and TanStack's generic types needs a few narrowing casts.
+    "typescript/no-unsafe-type-assertion": "off",
+
+    // React: hooks rules, stable keys, no raw HTML.
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/jsx-key": "error",
+    "react/no-array-index-key": "error",
+    "react/no-danger": "error",
+    "react/jsx-no-useless-fragment": "error",
+    "react/self-closing-comp": "error",
+    "react/react-in-jsx-scope": "off",
+    // Render props, like a popover's trigger, are intended.
+    "react/no-unstable-nested-components": ["error", { "allowAsProps": true }],
+
+    // Modules: named exports, no cycles, one entry point per package.
+    "import/no-cycle": "error",
+    "import/no-default-export": "error",
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
+    "oxc/no-barrel-file": ["error", { "threshold": 0 }],
+    "eslint/no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/packages/*/src/**", "../../react/**", "../../playground/**"],
+            "message": "Import other workspaces through their package name, not their source files."
+          }
+        ]
+      }
+    ],
+
+    // Readability: real names, named numbers, flat logic, small functions and files.
+    "eslint/id-length": [
+      "error",
+      { "min": 2, "exceptions": ["_", "T", "K", "V"], "properties": "never" }
+    ],
+    "unicorn/filename-case": ["error", { "case": "kebabCase" }],
+    "unicorn/consistent-function-scoping": "off",
+    "eslint/no-nested-ternary": "error",
+    "eslint/no-magic-numbers": [
+      "error",
+      {
+        "ignore": [-1, 0, 1, 2, 100, 1000],
+        "ignoreArrayIndexes": true,
+        "ignoreDefaultValues": true,
+        "ignoreClassFieldInitialValues": true,
+        "enforceConst": true,
+        "detectObjects": false
+      }
+    ],
+    "eslint/complexity": ["error", 10],
+    "eslint/max-depth": ["error", 3],
+    "eslint/max-params": ["error", 3],
+    "eslint/max-lines-per-function": [
+      "error",
+      { "max": 60, "skipBlankLines": true, "skipComments": true }
+    ],
+    "eslint/max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }]
+  },
+  "overrides": [
+    {
+      // Shipped and app source: documented, one exported unit per file, types in .type.ts files.
+      "files": ["packages/*/src/**/*.{ts,tsx}", "apps/*/src/**/*.{ts,tsx}"],
+      "rules": {
+        "tavola/require-docs": "error",
+        "tavola/one-export": "error",
+        "tavola/types-in-type-files": "error",
+        "jsdoc/require-param": ["error", { "checkDestructured": false }],
+        "jsdoc/require-param-name": "error",
+        "jsdoc/require-param-description": "error",
+        "jsdoc/require-returns": "error",
+        "jsdoc/require-returns-description": "error"
+      }
+    },
+    {
+      // The package entry point re-exports everything public.
+      "files": ["packages/react/src/index.ts"],
+      "rules": { "oxc/no-barrel-file": "off", "tavola/one-export": "off" }
+    },
+    {
+      // Tests, browser tests and tooling: literal values and long cases read better there.
+      "files": ["**/test/**", "**/e2e/**", "**/*.test.{ts,tsx}", "tooling/**"],
+      "rules": {
+        "eslint/no-magic-numbers": "off",
+        "eslint/no-nested-ternary": "off",
+        "eslint/max-lines-per-function": "off",
+        "eslint/max-lines": "off",
+        "eslint/complexity": "off",
+        "eslint/max-depth": "off",
+        "typescript/no-non-null-assertion": "off",
+        "typescript/explicit-module-boundary-types": "off"
+      }
+    },
+    {
+      // Example data, the pretend API and docs examples: readers copy literal values.
+      "files": [
+        "apps/playground/src/data/**",
+        "apps/docs/src/data/**",
+        "apps/docs/src/components/**"
+      ],
+      "rules": { "eslint/no-magic-numbers": "off", "eslint/complexity": "off" }
+    },
+    {
+      // Tool configuration files and plugins export a default by convention.
+      "files": ["**/*.config.{ts,js,mjs}", "tooling/**"],
+      "rules": { "import/no-default-export": "off" }
+    }
+  ],
+  "ignorePatterns": ["**/dist/**", "**/.astro/**", ".pnpm-store/**"]
+}

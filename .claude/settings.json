@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" || exit 0; command -v mise >/dev/null && eval \"$(mise env -s bash)\"; file=$(jq -r '.tool_input.file_path // empty'); case \"$file\" in *.ts|*.tsx|*.js|*.mjs|*.json|*.css|*.md|*.mdx|*.yml) pnpm exec oxfmt --write \"$file\" >/dev/null 2>&1 ;; esac; exit 0",
+            "timeout": 30,
+            "statusMessage": "Formatting the edited file"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" || exit 0; jq -e '.stop_hook_active' >/dev/null && exit 0; command -v mise >/dev/null && eval \"$(mise env -s bash)\"; files=$(git status --porcelain | awk '{print $NF}' | grep -E '\\.(ts|tsx|js|mjs)$' | while read -r f; do [ -f \"$f\" ] && echo \"$f\"; done); report=$( { pnpm -s typecheck && { [ -z \"$files\" ] || pnpm exec oxlint --deny-warnings $files; }; } 2>&1 ) && exit 0; jq -n --arg why \"$(printf '%s' \"$report\" | tail -40)\" '{decision: \"block\", reason: (\"Typecheck or lint fails on the changed files. Fix it before stopping:\\n\" + $why)}'",
+            "timeout": 240,
+            "statusMessage": "Checking types and lint"
+          }
+        ]
+      }
+    ]
+  }
+}

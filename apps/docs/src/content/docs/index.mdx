@@ -1,0 +1,41 @@
+---
+title: Tavola
+description: An admin data table for React. Typed columns, filters, sorting, column picker, drag-to-reorder, pinning, selection and server mode, on TanStack Table.
+template: splash
+hero:
+  tagline: An admin data table for React. Every feature you expect from a data grid, a typed API that is hard to misuse, and one query object for your server.
+  actions:
+    - text: Get started
+      link: /tavola/getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/brniamut/tavola
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import { ClientExample } from '../../components/client-example.tsx';
+
+<ClientExample client:only="react" />
+
+Try it: search, sort with Shift-click for a second column, open a column menu (the dots in a header) to filter or pin, drag a header by its grip, resize from its edge, select rows. Reload the page and your layout is still there.
+
+<CardGrid>
+  <Card title="Typed columns" icon="seti:typescript">
+    `col.number('name')` does not compile when `name` is a string. The column kind decides the
+    filter, the sorting and the formatting.
+  </Card>
+  <Card title="One query for your server" icon="rocket">
+    Pass a `fetcher` and get `{ sort, filters, search, page }`. Debouncing, cancellation, page
+    resets and cursor paging are handled.
+  </Card>
+  <Card title="Styles you can override" icon="pencil">
+    Plain CSS in a cascade layer, themed with CSS variables. Your classes and Tailwind win without
+    `!important`.
+  </Card>
+  <Card title="No paid tier" icon="approve-check">
+    Pinning, multi-sort, filters, reordering and selection are all MIT licensed, on TanStack Table
+    v9.
+  </Card>
+</CardGrid>

@@ -1,0 +1,45 @@
+# Git hooks for Tavola, managed by lefthook. `pnpm install` installs them (see postinstall).
+
+# Use the lefthook from this checkout's node_modules, so every clone and worktree runs the same
+# version, and load the Node and pnpm versions pinned in .tool-versions first.
+lefthook: node_modules/.bin/lefthook
+rc: .lefthook-rc
+
+pre-commit:
+  # Hooks stay out of the way while git resolves a merge or rebase.
+  skip:
+    - merge
+    - rebase
+  commands:
+    # Format the staged files and add the result to the commit.
+    format:
+      priority: 1
+      glob: '*.{ts,tsx,js,mjs,json,css,md,mdx,yml,yaml}'
+      run: pnpm exec oxfmt --write --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+    # Lint the staged files, including Tavola's own rules. Report only: fixes are made by hand.
+    lint:
+      priority: 2
+      glob: '*.{ts,tsx,js,mjs}'
+      run: pnpm exec oxlint --deny-warnings {staged_files}
+    # Types cross file boundaries, so every project is checked.
+    typecheck:
+      priority: 2
+      glob: '*.{ts,tsx}'
+      run: pnpm typecheck
+
+commit-msg:
+  commands:
+    # Conventional Commits; release-please reads them to version and describe releases.
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  # The slower checks, before anything leaves the machine.
+  commands:
+    knip:
+      run: pnpm exec knip
+    test:
+      run: pnpm test
+    build:
+      run: pnpm build

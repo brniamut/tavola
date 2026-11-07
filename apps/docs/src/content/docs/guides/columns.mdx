@@ -1,0 +1,105 @@
+---
+title: Columns
+description: Column kinds, options, custom cells and row actions.
+---
+
+`defineColumns<Row>` hands you a builder with one method per kind of data. The kind decides the filter editor, the sorting and the formatting, and TypeScript only accepts keys whose value fits.
+
+```ts
+const columns = defineColumns<Person>((col) => [
+  col.text('name', { pin: 'start', size: 200 }),
+  col.enum('role', { options: ['admin', 'editor', 'viewer'] }),
+  col.number('logins', { priority: 3 }),
+  col.date('joined', { header: 'Member since' }),
+  col.boolean('active'),
+  col.display('profile', { cell: (person) => <a href={`/people/${person.id}`}>Open</a> }),
+  col.actions((person) => [{ label: 'Delete', onSelect: () => remove(person), danger: true }]),
+]);
+```
+
+## Kinds
+
+| Method                       | Accepts keys holding | Filter                  | Sorting                     |
+| ---------------------------- | -------------------- | ----------------------- | --------------------------- |
+| `col.text(key)`              | `string`             | Contains, ignoring case | Alphabetical, ignoring case |
+| `col.number(key)`            | `number`             | Min and max             | Numeric                     |
+| `col.date(key)`              | `Date` or ISO string | From and to day         | Chronological               |
+| `col.enum(key, { options })` | any                  | Checkboxes, with counts | By value                    |
+| `col.boolean(key)`           | `boolean`            | Any, yes, no            | False first                 |
+| `col.display(id, { cell })`  | no key               | None                    | None                        |
+| `col.actions(getActions)`    | no key               | None                    | None                        |
+
+Nullable fields are fine: `team: string | null` works with `col.text`. Missing values never match a filter and sort last.
+
+```ts
+col.number('name'); // Error: 'name' is not a number field
+col.enum('role', { options: ['owner'] }); // Error: 'owner' is not a role
+col.text('nmae'); // Error: no such key
+```
+
+## Options
+
+Every column takes:
+
+| Option                                 | Default           | Purpose                                                                   |
+| -------------------------------------- | ----------------- | ------------------------------------------------------------------------- |
+| `header`                               | the key in words  | Header, column picker and filter label. `createdAt` becomes "Created at". |
+| `size`, `minSize`, `maxSize`           | 160, 64, none     | Widths in pixels.                                                         |
+| `pin`                                  | none              | `'start'` or `'end'`. The user can change it.                             |
+| `hidden`                               | `false`           | Start hidden; the user can show it.                                       |
+| `priority`                             | none              | Hide automatically on narrow screens; higher numbers first.               |
+| `align`                                | `end` for numbers | `'start'`, `'center'` or `'end'`.                                         |
+| `className`                            | none              | A class on every cell, or a function of the row.                          |
+| `hideable`, `reorderable`, `resizable` | `true`            | Lock what the user may change.                                            |
+
+Data columns also take `sortable`, `filterable` (both default `true`) and `searchable` (default `true` for text and enum columns).
+
+## Custom cells
+
+`cell` receives the typed value and the whole row. Return anything React can render:
+
+```tsx
+col.enum('status', {
+  options: ['active', 'invited', 'suspended'],
+  cell: ({ value }) => <span className={`badge badge-${value}`}>{value}</span>,
+});
+col.number('storageMb', {
+  header: 'Storage',
+  cell: ({ value }) => `${(value / 1024).toFixed(1)} GB`,
+});
+```
+
+Sorting, filtering and search keep using the raw value, so a formatted cell still sorts correctly.
+
+## Enum options with labels
+
+Options can be bare values or `{ value, label }`. Labels show in cells, filters and filter chips:
+
+```ts
+col.enum('role', {
+  options: [
+    { value: 'admin', label: 'Administrator' },
+    { value: 'viewer', label: 'Read only' },
+  ],
+});
+```
+
+## Row actions
+
+`col.actions` adds a menu at the end of each row, pinned to the end edge. Actions can be `danger` (shown in red) or `disabled`:
+
+```ts
+col.actions((person) => [
+  { label: 'Edit', onSelect: () => edit(person) },
+  {
+    label: 'Delete',
+    onSelect: () => remove(person),
+    danger: true,
+    disabled: person.role === 'admin',
+  },
+]);
+```
+
+## Where to define columns
+
+At module level, or in `useMemo` when they depend on props or callbacks. The table also copes with a new columns array on every render without loops or refetches, but defining them once lets rows skip rerendering.

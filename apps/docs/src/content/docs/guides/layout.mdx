@@ -1,0 +1,41 @@
+---
+title: Layout and persistence
+description: Column picker, reordering, resizing, pinning, density, narrow screens and the saved layout.
+---
+
+Users arrange the columns themselves:
+
+- **Show and hide** from the Columns button, which also holds the density setting and "Reset layout".
+- **Reorder** by dragging a header's grip, which appears on hover. Columns move within their region: pinned to the start, unpinned, or pinned to the end.
+- **Resize** by dragging a header's right edge. Double-click the edge to restore the default width.
+- **Pin and unpin** from a header's menu. Pinned columns stay in place while the table scrolls sideways; row actions always stay at the very end.
+- **Density**: compact, normal or comfortable rows.
+
+You set the starting point per column with `pin`, `hidden`, `size` and `defaultDensity`, and lock what users may change with `hideable`, `reorderable` and `resizable`.
+
+## Remembering the layout
+
+With an `id`, the column order, visibility, pinning, widths, density and page size are saved in `localStorage` under `tavola:<id>`.
+
+```tsx
+<DataTable id="people" /* ... */ />
+```
+
+The saved layout is safe across releases of your app:
+
+- It is read after mount, so server rendering and hydration are not affected.
+- It is checked against the current columns. Columns you removed are dropped, columns you added appear in their default place, and widths are clamped to the column limits.
+- It is versioned, so a future change in the storage format starts from the defaults instead of breaking.
+- When storage is unavailable (private mode, full), the table works and simply does not remember.
+
+## Narrow screens
+
+Give columns a `priority` and they hide automatically when the table is narrower than its columns, the highest number first, until the rest fits. Columns without a priority never hide by themselves:
+
+```ts
+col.text('name'), // always shown
+col.text('email', { priority: 1 }), // hidden last
+col.date('joined', { priority: 2 }), // hidden first
+```
+
+The calculation uses the column widths, not the rendered page, so columns do not flicker in and out. Columns hidden this way are not saved, and a user can still show one from the column picker; that choice wins.

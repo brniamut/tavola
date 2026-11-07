@@ -1,0 +1,84 @@
+/* The playground page itself. The table's look comes from @tavola/react/styles.css. */
+:root {
+  color-scheme: light;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: light-dark(#f3f4f6, #0e1013);
+  color: light-dark(#111827, #e5e7eb);
+}
+
+.page[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+.page .tv-root {
+  height: 640px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-header h1 {
+  margin: 0 auto 0 0;
+  font-size: 1.25rem;
+}
+
+.switch {
+  display: inline-flex;
+  border: 1px solid light-dark(#d1d5db, #374151);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.switch button,
+.theme {
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.switch button[aria-pressed='true'] {
+  background: light-dark(#111827, #e5e7eb);
+  color: light-dark(#fff, #111827);
+}
+
+.theme-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme {
+  border: 1px solid light-dark(#d1d5db, #374151);
+  border-radius: 6px;
+}
+
+.log h2 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+.log ol {
+  margin: 0;
+  padding-inline-start: 20px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}

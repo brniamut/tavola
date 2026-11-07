@@ -1,0 +1,33 @@
+{
+  "name": "tavola-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "postinstall": "command -v git >/dev/null 2>&1 && lefthook install || true",
+    "dev": "pnpm --filter playground dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "oxlint --deny-warnings && knip",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt --write .",
+    "check": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "test:e2e": "pnpm --filter playground test:e2e"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "@oxlint/plugins": "1.92.0",
+    "knip": "6.44.1",
+    "lefthook": "2.2.2",
+    "oxfmt": "0.76.0",
+    "oxlint": "1.91.0",
+    "oxlint-tsgolint": "7.0.2006",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24.22.0"
+  },
+  "packageManager": "pnpm@12.16.1"
+}

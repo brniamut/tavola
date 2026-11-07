@@ -1,0 +1,70 @@
+---
+title: Getting started
+description: Install Tavola and render your first table.
+---
+
+import { ClientExample } from '../../components/client-example.tsx';
+
+## Install
+
+```sh
+pnpm add @tavola/react
+```
+
+React 18.3 and 19 are supported. TanStack Table and dnd-kit come along as dependencies; you do not configure them.
+
+## Your first table
+
+```tsx
+import { DataTable, defineColumns } from '@tavola/react';
+import '@tavola/react/styles.css';
+
+interface Person {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'editor' | 'viewer';
+  logins: number;
+  joined: string;
+  active: boolean;
+}
+
+const columns = defineColumns<Person>((col) => [
+  col.text('name', { pin: 'start' }),
+  col.text('email'),
+  col.enum('role', { options: ['admin', 'editor', 'viewer'] }),
+  col.number('logins'),
+  col.date('joined'),
+  col.boolean('active'),
+]);
+
+export function People({ people }: { people: Person[] }) {
+  return (
+    <DataTable
+      id="people"
+      label="People"
+      columns={columns}
+      data={people}
+      getRowId={(person) => person.id}
+    />
+  );
+}
+```
+
+That is the whole setup. The result:
+
+<ClientExample client:only="react" />
+
+Three props are required:
+
+- `columns`, from `defineColumns`. Define them at module level or in `useMemo`.
+- `getRowId`, a stable id per row such as a database id. Selection depends on it, so never use the array index.
+- `data` with all rows, or `fetcher` to let your server do the work. See [server mode](/tavola/guides/server-mode/).
+
+`id` is optional: with it, the column layout the user arranges is remembered in the browser. `label` names the table for screen readers.
+
+## Next
+
+- [Columns](/tavola/guides/columns/): kinds, options and custom cells.
+- [Server mode](/tavola/guides/server-mode/): one fetch function for sorting, filtering and paging.
+- [Styling](/tavola/guides/styling/): theme it to match your app.

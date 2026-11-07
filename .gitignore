@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+logs/
+.playwright-mcp/
+.claude/worktrees/
+.worktrees/
+.DS_Store
+.pnpm-store/
+*.tsbuildinfo
+__screenshots__/
+test-results/
+playwright-report/
+.astro/

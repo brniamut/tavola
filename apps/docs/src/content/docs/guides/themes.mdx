@@ -1,0 +1,63 @@
+---
+title: Themes
+description: Five built-in looks, each in light and dark, from the warm default to a ruled account book.
+---
+
+import { ThemeShowcase } from '../../../components/theme-showcase.tsx';
+
+Tavola ships five looks. Pick one with the `theme` prop; there is nothing extra to import. Each works in light and dark (use the site's theme toggle to compare), and every text colour meets WCAG AA contrast in both.
+
+<ThemeShowcase client:only="react" />
+
+```tsx
+<DataTable theme="ink" /* ... */ />
+```
+
+| Theme    | Character                                                                                                            |
+| -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `cotto`  | The default. Warm paper and ink with a terracotta accent, named after Italian floor tiles.                           |
+| `ink`    | Monochrome zinc with a black accent. Neutral in any product.                                                         |
+| `basil`  | Green on cool paper. Calm, for screens people work in all day.                                                       |
+| `harbor` | Slate and blue, the familiar SaaS look, for apps that want the table to blend in.                                    |
+| `ledger` | The default colours as an account book: square corners, ruled columns, striped rows and figures in a monospace font. |
+
+## Details that come with every theme
+
+- **Selection spine**: a selected row gets a bar in the accent colour on its leading edge, so selection never depends on colour alone.
+- **Ledger rule**: a firmer line under the header, and a soft shadow once the body scrolls beneath it.
+- **Pinned edges**: a crisp line where pinned columns end, with a shadow only while content is actually scrolled underneath.
+- **Sorted column**: the sorted column carries a faint wash, and its header and arrow take the text and accent colours.
+- **Focus**: a 2px ring in the accent colour, offset so it never hides what it marks.
+
+## Make it your own
+
+Themes are sets of CSS variables, so you can start from any of them and change what you need, without leaving the theme:
+
+```css
+.tv-root[data-tv-theme='harbor'] {
+  --tv-accent: light-dark(#7c3aed, #a78bfa);
+  --tv-radius: 12px;
+}
+```
+
+See [Styling](/tavola/guides/styling/) for every variable, your own classes and the state attributes.
+
+## Status badges
+
+The stylesheet includes a badge for status cells, in the theme's palette:
+
+```tsx
+col.enum('status', {
+  options: ['active', 'invited', 'suspended'],
+  cell: ({ value }) => (
+    <span
+      className="tv-badge"
+      data-tone={{ active: 'success', invited: 'info', suspended: 'danger' }[value]}
+    >
+      {value}
+    </span>
+  ),
+});
+```
+
+Tones: `success`, `warning`, `info`, `danger`, and neutral when `data-tone` is left out.

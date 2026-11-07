@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>g { fill: #a84b25 } @media (prefers-color-scheme: dark) { g { fill: #e8875e } }</style>
+  <defs><clipPath id="tavola-top"><rect x="2" y="2" width="28" height="28" rx="6"/></clipPath></defs>
+  <g clip-path="url(#tavola-top)">
+    <rect x="2" y="2" width="28" height="9"/>
+    <rect x="2" y="13" width="8" height="17"/>
+    <rect x="12" y="13" width="8" height="17"/>
+    <rect x="22" y="13" width="8" height="17"/>
+  </g>
+</svg>

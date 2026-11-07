@@ -1,0 +1,72 @@
+---
+title: Server mode
+description: Let your API sort, filter and page, through one fetch function.
+---
+
+import { ServerExample } from '../../../components/server-example.tsx';
+
+Pass `fetcher` instead of `data`. The table sends one plain query object and shows the page that comes back.
+
+```tsx
+<DataTable
+  columns={columns}
+  getRowId={(person) => person.id}
+  fetcher={async (query, { signal }) => {
+    const response = await fetch(
+      `/api/people?${new URLSearchParams({ q: JSON.stringify(query) })}`,
+      { signal },
+    );
+    return response.json(); // { rows: Person[], total: number }
+  }}
+/>
+```
+
+This example talks to a pretend API with 1000 rows and a short delay:
+
+<ServerExample client:only="react" />
+
+## The query
+
+```ts
+interface TableQuery {
+  sort: { id: string; desc: boolean }[]; // most significant first
+  filters: Record<string, FilterValue>; // by column id; columns without a filter are absent
+  search: string;
+  page: { index: number; size: number; cursor?: string | null };
+}
+```
+
+Filter values per column kind:
+
+| Kind    | Value                                            |
+| ------- | ------------------------------------------------ |
+| text    | `string`                                         |
+| number  | `{ min?: number; max?: number }`                 |
+| date    | `{ from?: string; to?: string }` as `YYYY-MM-DD` |
+| enum    | an array of the selected values                  |
+| boolean | `boolean`                                        |
+
+## What the table handles for you
+
+- **Debouncing**: typing in the search box or a filter sends one request, not one per key.
+- **Cancellation**: a new query aborts the request in flight through `signal`, and a late answer to an old query is ignored.
+- **Page resets**: changing sort, filters or search goes back to the first page in the same update, so your API never gets a page that no longer exists.
+- **No flicker**: the current rows stay visible, dimmed, while the next page loads.
+- **Errors**: a failed request shows an error with a retry button.
+
+## Cursor pagination
+
+If your API pages with cursors, return `nextCursor` instead of, or next to, `total`:
+
+```ts
+fetcher={async (query, { signal }) => {
+  const page = await api.people({ after: query.page.cursor, limit: query.page.size, signal });
+  return { rows: page.items, nextCursor: page.next ?? null, total: page.count };
+}}
+```
+
+The table sends the cursor back as `query.page.cursor`, keeps the cursors of earlier pages for going back, and starts over when sort, filters or search change. `total` is optional: without it the footer shows `1-25` and "select all matching" works without a count. The first request has no `cursor`; after the API has returned one, the first page is requested with `cursor: null`.
+
+## Facet counts
+
+In client mode the enum filters show how many rows have each value. In server mode the table only sees one page, so it shows no counts rather than misleading ones.

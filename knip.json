@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["tooling/**/*.js"]
+    },
+    "packages/react": {
+      "entry": ["src/styles/styles.css"],
+      "project": ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"]
+    },
+    "apps/playground": {
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "compat/react-18": {
+      "entry": ["*.test.ts"],
+      "ignoreDependencies": [
+        "@testing-library/react",
+        "@testing-library/dom",
+        "@testing-library/user-event",
+        "@tanstack/react-table",
+        "@dnd-kit/react",
+        "@tanstack/query-core"
+      ]
+    },
+    "apps/docs": {
+      "entry": ["src/components/*.tsx"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignoreDependencies": ["@fontsource-variable/fraunces"]
+    }
+  }
+}

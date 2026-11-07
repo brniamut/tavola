@@ -1,0 +1,83 @@
+---
+title: URL and caching
+description: Keep the query in the URL, control it yourself, or cache pages with TanStack Query.
+---
+
+## Reacting to changes
+
+`onQueryChange` reports every change of sort, filters, search and page. On its own it only reports; the table keeps the query. To own the query, pass `query` too:
+
+```tsx
+const [query, setQuery] = useState<TableQuery>(initialQuery);
+<DataTable query={query} onQueryChange={setQuery} /* ... */ />;
+```
+
+Passing only one half of the pair never freezes the table, a common trap in other table libraries. To start with a sort or filter without controlling the query, use `defaultQuery`:
+
+```tsx
+<DataTable
+  defaultQuery={{ sort: [{ id: 'joined', desc: true }], filters: { role: ['admin'] } }} /* ... */
+/>
+```
+
+## In the URL
+
+`useUrlQuery` keeps the query in the address bar, so a filtered view can be bookmarked and shared and the back button restores it. It needs no router:
+
+```tsx
+import { DataTable, useUrlQuery } from '@tavola/react';
+
+<DataTable
+  {...useUrlQuery()}
+  columns={columns}
+  fetcher={fetchPeople}
+  getRowId={(person) => person.id}
+/>;
+```
+
+The URL stays readable, and defaults are left out:
+
+```text
+/people?sort=name,-logins&q=ada&page=2&size=50&filter={"role":["admin"]}
+```
+
+Options: `prefix` for more than one table on a page (`useUrlQuery({ prefix: 'people.' })`), `defaultQuery`, `defaultPageSize`, and `history: 'push'` to add a history entry per change instead of replacing it.
+
+### With a router
+
+When a router owns the URL (Next.js, TanStack Router, React Router), use the pure helpers with its navigation:
+
+```ts
+import { queryToSearchParams, searchParamsToQuery } from '@tavola/react';
+
+const query = searchParamsToQuery(searchParams);
+const onQueryChange = (next: TableQuery) =>
+  router.replace(`?${queryToSearchParams(next, {}, searchParams)}`);
+```
+
+`queryToSearchParams` keeps unrelated parameters, and `searchParamsToQuery` turns any URL, also a broken one, into a valid query.
+
+## Caching with TanStack Query
+
+`queryClientFetcher` puts pages in your TanStack Query cache. Going back to a page is instant, two tables with the same query fetch once, and invalidating the base key after a change refreshes the table.
+
+```tsx
+import { queryClientFetcher } from '@tavola/react';
+import { useQueryClient } from '@tanstack/react-query';
+
+const queryClient = useQueryClient();
+const fetcher = useMemo(
+  () =>
+    queryClientFetcher(queryClient, {
+      queryKey: ['people'],
+      queryFn: api.listPeople,
+      staleTime: 30_000,
+    }),
+  [queryClient],
+);
+
+// After a mutation:
+await queryClient.invalidateQueries({ queryKey: ['people'] });
+```
+
+Tavola does not depend on TanStack Query; it uses whatever `QueryClient` you pass.

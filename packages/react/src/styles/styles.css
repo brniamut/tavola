@@ -1,0 +1,1071 @@
+/*
+ * Tavola's default look: warm paper-and-ink neutrals with one terracotta accent ("cotto").
+ * Everything sits in the `tavola` cascade layer, so any class of your own (Tailwind utilities,
+ * CSS modules, plain CSS) wins without `!important`.
+ *
+ * Theme it with the --tv-* variables, on .tv-root or any ancestor:
+ *   .tv-root { --tv-accent: #0f766e; --tv-radius: 4px; }
+ * State is exposed as data attributes: [data-sorted], [data-selected], [data-pinned],
+ * [data-density], [data-loading], [data-filtered], [data-dragging], [data-scrolled-x],
+ * [data-scrolled-y].
+ *
+ * Dark mode follows the page's `color-scheme`: set `color-scheme: light dark` on the page to follow
+ * the system, or `color-scheme: dark` on .tv-root (or an ancestor) to force it.
+ *
+ * Every text colour meets WCAG AA (4.5:1) on every background it appears on, in both schemes.
+ */
+@layer tavola {
+  .tv-root {
+    --tv-font: inherit;
+    --tv-font-size: 0.875rem;
+    --tv-text: light-dark(#2a2420, #f2ede6);
+    --tv-text-muted: light-dark(#6b6157, #a39a8e);
+    --tv-bg: light-dark(#fefcf9, #1b1816);
+    --tv-bg-subtle: light-dark(#f6f1ea, #24201d);
+    --tv-bg-hover: light-dark(#f2ece4, #2b2723);
+    --tv-bg-selected: light-dark(#f9ebe4, #3a271e);
+    --tv-header-bg: var(--tv-bg-subtle);
+    --tv-border: light-dark(#e8e1d6, #34302b);
+    --tv-border-strong: light-dark(#d6ccbd, #4a443d);
+    --tv-accent: light-dark(#a84b25, #e8875e);
+    --tv-accent-text: light-dark(#ffffff, #1b1816);
+    --tv-danger: light-dark(#b42343, #f47a8e);
+    --tv-danger-bg: light-dark(#f9e3e6, #3a1d23);
+    --tv-focus: var(--tv-accent);
+    --tv-shadow-color: light-dark(rgb(42 36 32 / 0.16), rgb(0 0 0 / 0.5));
+    --tv-shadow:
+      0 1px 2px light-dark(rgb(42 36 32 / 0.06), rgb(0 0 0 / 0.4)),
+      0 8px 24px -6px var(--tv-shadow-color);
+    --tv-radius: 8px;
+    --tv-radius-control: calc(var(--tv-radius) - 2px);
+    --tv-row-height: 40px;
+    --tv-cell-padding-x: 12px;
+
+    font-family: var(--tv-font);
+    font-size: var(--tv-font-size);
+    line-height: 1.43;
+    color: var(--tv-text);
+    background: var(--tv-bg);
+    border: 1px solid var(--tv-border);
+    border-radius: var(--tv-radius);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tv-root[data-density='compact'] {
+    --tv-row-height: 32px;
+    --tv-cell-padding-x: 8px;
+  }
+
+  .tv-root[data-density='comfortable'] {
+    --tv-row-height: 52px;
+    --tv-cell-padding-x: 16px;
+  }
+
+  .tv-root *,
+  .tv-root *::before,
+  .tv-root *::after {
+    box-sizing: border-box;
+  }
+
+  /* Signature: the terracotta focus ring, offset so it never hides what it marks. */
+  .tv-root :focus-visible,
+  .tv-popover :focus-visible {
+    outline: 2px solid var(--tv-focus);
+    outline-offset: 2px;
+  }
+
+  .tv-root :is(.tv-td, .tv-th) :focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* Toolbar, selection bar and footer */
+
+  .tv-toolbar,
+  .tv-footer,
+  .tv-selection-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px var(--tv-cell-padding-x);
+  }
+
+  .tv-toolbar {
+    border-bottom: 1px solid var(--tv-border);
+  }
+
+  .tv-footer {
+    border-top: 1px solid var(--tv-border);
+    color: var(--tv-text-muted);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tv-selection-bar {
+    background: var(--tv-bg-selected);
+    border-bottom: 1px solid var(--tv-border);
+    box-shadow: inset 2px 0 0 var(--tv-accent);
+  }
+
+  .tv-selection-count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tv-spacer {
+    flex: 1;
+  }
+
+  .tv-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 220px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--tv-border-strong);
+    border-radius: var(--tv-radius-control);
+    background: var(--tv-bg);
+    color: var(--tv-text-muted);
+    transition: border-color 120ms;
+  }
+
+  .tv-search:focus-within {
+    border-color: var(--tv-accent);
+    outline: 2px solid var(--tv-focus);
+    outline-offset: 2px;
+  }
+
+  .tv-search-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--tv-text);
+    font: inherit;
+    outline: none;
+  }
+
+  .tv-search-input::placeholder,
+  .tv-input::placeholder {
+    color: var(--tv-text-muted);
+  }
+
+  .tv-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tv-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 280px;
+    height: 26px;
+    padding: 0 3px 0 10px;
+    border: 1px solid var(--tv-border-strong);
+    border-radius: 999px;
+    background: var(--tv-bg-subtle);
+    color: var(--tv-text);
+    font-size: 0.8125rem;
+  }
+
+  .tv-chip-remove {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--tv-text-muted);
+    cursor: pointer;
+  }
+
+  .tv-chip-remove:hover {
+    background: var(--tv-bg-hover);
+    color: var(--tv-text);
+  }
+
+  .tv-chip-remove .tv-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Buttons and inputs */
+
+  .tv-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--tv-border-strong);
+    border-radius: var(--tv-radius-control);
+    background: var(--tv-bg);
+    color: var(--tv-text);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 120ms;
+  }
+
+  .tv-button:hover:not(:disabled) {
+    background: var(--tv-bg-hover);
+  }
+
+  .tv-button.tv-danger {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .tv-button.tv-danger:hover:not(:disabled) {
+    background: var(--tv-danger-bg);
+  }
+
+  .tv-icon-button {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--tv-radius-control);
+    background: transparent;
+    color: var(--tv-text-muted);
+    cursor: pointer;
+    transition: background-color 120ms;
+  }
+
+  .tv-icon-button:hover:not(:disabled) {
+    background: var(--tv-bg-hover);
+    color: var(--tv-text);
+  }
+
+  .tv-button:disabled,
+  .tv-icon-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .tv-danger {
+    color: var(--tv-danger);
+  }
+
+  .tv-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--tv-accent);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .tv-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .tv-input,
+  .tv-select-input {
+    width: 100%;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--tv-border-strong);
+    border-radius: var(--tv-radius-control);
+    background: var(--tv-bg);
+    color: var(--tv-text);
+    font: inherit;
+    transition: border-color 120ms;
+  }
+
+  .tv-input:focus-visible,
+  .tv-select-input:focus-visible {
+    border-color: var(--tv-accent);
+  }
+
+  .tv-select-input {
+    width: auto;
+    padding-inline-end: 4px;
+  }
+
+  /* Native checkboxes in the accent colour: the browser keeps the check mark readable. */
+  .tv-checkbox,
+  .tv-check input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--tv-accent);
+    cursor: pointer;
+  }
+
+  .tv-icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Status badges for your own cells: <span class="tv-badge" data-tone="success">Active</span> */
+  .tv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: 999px;
+    /* Neutral by default, in the theme's own greys. */
+    background: var(--tv-bg-subtle);
+    color: var(--tv-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .tv-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .tv-badge[data-tone='success'] {
+    background: light-dark(#e9f0e3, #26301f);
+    color: light-dark(#3d5a2a, #a9c98f);
+  }
+
+  .tv-badge[data-tone='warning'] {
+    background: light-dark(#f8ecd2, #352a16);
+    color: light-dark(#7a5410, #e6bf73);
+  }
+
+  .tv-badge[data-tone='info'] {
+    background: light-dark(#e4ecf4, #1e2a36);
+    color: light-dark(#2f5175, #9cbde0);
+  }
+
+  .tv-badge[data-tone='danger'] {
+    background: light-dark(#f9e3e6, #3a1d23);
+    color: light-dark(#9b1c36, #f4a0ae);
+  }
+
+  /* Table */
+
+  .tv-scroller {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .tv-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .tv-th,
+  .tv-td {
+    height: var(--tv-row-height);
+    padding: 0 var(--tv-cell-padding-x);
+    border-bottom: 1px solid var(--tv-border);
+    background: var(--tv-bg);
+    text-align: start;
+    vertical-align: middle;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tv-td {
+    transition: background-color 120ms;
+  }
+
+  /* Signature: the ledger rule. A heavier line under the linen header, and a soft shadow once
+     the body scrolls beneath it. */
+  .tv-th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--tv-header-bg);
+    border-bottom-color: var(--tv-border-strong);
+    color: var(--tv-text-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .tv-thead .tv-filler {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--tv-header-bg);
+    border-bottom-color: var(--tv-border-strong);
+  }
+
+  .tv-root[data-scrolled-y] .tv-thead :is(.tv-th, .tv-filler) {
+    box-shadow: 0 4px 8px -4px var(--tv-shadow-color);
+  }
+
+  .tv-tbody .tv-tr:last-child > :is(.tv-td, .tv-filler) {
+    border-bottom: 0;
+  }
+
+  [data-align='end'] {
+    text-align: end;
+  }
+
+  [data-align='center'] {
+    text-align: center;
+  }
+
+  .tv-filler {
+    padding: 0;
+    border-bottom: 1px solid var(--tv-border);
+    background: var(--tv-bg);
+  }
+
+  .tv-select {
+    padding: 0;
+    text-align: center;
+  }
+
+  /* Pinned columns: offsets come from variables the table sets. */
+
+  [data-pinned] {
+    position: sticky;
+    z-index: 1;
+  }
+
+  .tv-th[data-pinned] {
+    z-index: 3;
+  }
+
+  /* Signature: a crisp line where pinned columns end, with a soft shadow only while content is
+     actually scrolled underneath them. */
+  [data-pin-edge][data-pinned='start'] {
+    box-shadow: inset -1px 0 0 var(--tv-border-strong);
+  }
+
+  [data-pin-edge][data-pinned='end'] {
+    box-shadow: inset 1px 0 0 var(--tv-border-strong);
+  }
+
+  .tv-root[data-scrolled-x~='start'] [data-pin-edge][data-pinned='start'] {
+    box-shadow:
+      inset -1px 0 0 var(--tv-border-strong),
+      8px 0 8px -8px var(--tv-shadow-color);
+  }
+
+  .tv-root[data-scrolled-x~='end'] [data-pin-edge][data-pinned='end'] {
+    box-shadow:
+      inset 1px 0 0 var(--tv-border-strong),
+      -8px 0 8px -8px var(--tv-shadow-color);
+  }
+
+  /* Rows */
+
+  .tv-tbody .tv-tr:hover > :is(.tv-td, .tv-filler) {
+    background: var(--tv-bg-hover);
+  }
+
+  /* Signature: the sorted column carries a faint wash. */
+  .tv-td[data-sorted] {
+    background: color-mix(in srgb, var(--tv-bg-subtle) 60%, var(--tv-bg));
+  }
+
+  .tv-tr[data-selected] > :is(.tv-td, .tv-filler) {
+    background: var(--tv-bg-selected);
+  }
+
+  /* Signature: the selection spine, so selection never depends on colour fill alone. */
+  .tv-tr[data-selected] > .tv-td:first-child {
+    box-shadow: inset 2px 0 0 var(--tv-accent);
+  }
+
+  .tv-tr[data-selected] > .tv-td:first-child[data-pin-edge] {
+    box-shadow:
+      inset 2px 0 0 var(--tv-accent),
+      inset -1px 0 0 var(--tv-border-strong);
+  }
+
+  .tv-tr[data-clickable] {
+    cursor: pointer;
+  }
+
+  .tv-root[data-loading] .tv-tbody {
+    opacity: 0.55;
+    transition: opacity 150ms;
+  }
+
+  /* Empty and error states */
+
+  .tv-state {
+    height: calc(var(--tv-row-height) * 5);
+    padding: 24px;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .tv-state-inner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    max-width: 360px;
+  }
+
+  .tv-state-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 4px;
+    border-radius: 999px;
+    background: var(--tv-bg-subtle);
+    color: var(--tv-text-muted);
+  }
+
+  .tv-state-icon .tv-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  [data-state='error'] .tv-state-icon {
+    color: var(--tv-danger);
+  }
+
+  .tv-state-title {
+    margin: 0;
+    color: var(--tv-text);
+    font-weight: 500;
+  }
+
+  .tv-state .tv-button {
+    margin-top: 8px;
+  }
+
+  .tv-skeleton-row .tv-td {
+    border-bottom-color: transparent;
+  }
+
+  .tv-skeleton {
+    display: block;
+    width: 70%;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--tv-bg-subtle);
+    animation: tv-pulse 1.6s ease-in-out infinite;
+  }
+
+  .tv-skeleton-row:nth-child(3n + 2) .tv-skeleton {
+    width: 55%;
+  }
+
+  .tv-skeleton-row:nth-child(3n) .tv-skeleton {
+    width: 80%;
+  }
+
+  @keyframes tv-pulse {
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tv-skeleton {
+      animation: none;
+    }
+
+    .tv-root *,
+    .tv-popover * {
+      transition: none;
+    }
+  }
+
+  /* Header contents */
+
+  .tv-th-inner {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .tv-th[data-align='end'] .tv-th-inner {
+    flex-direction: row-reverse;
+  }
+
+  .tv-th-label {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .tv-th[data-align='end'] .tv-th-label {
+    justify-content: flex-end;
+  }
+
+  .tv-th[data-sorted] .tv-th-label {
+    color: var(--tv-text);
+  }
+
+  .tv-sort {
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .tv-sort:hover {
+    color: var(--tv-text);
+  }
+
+  /* The sort arrow takes no room until it matters, so short columns keep their full label. */
+  .tv-sort-icon {
+    display: none;
+    flex: none;
+    align-items: center;
+  }
+
+  .tv-sort:hover .tv-sort-icon,
+  .tv-sort:focus-visible .tv-sort-icon,
+  .tv-sort-icon[data-active] {
+    display: inline-flex;
+  }
+
+  .tv-sort-icon[data-active] {
+    color: var(--tv-accent);
+  }
+
+  .tv-sort-icon sup {
+    font-size: 0.7em;
+    font-weight: 600;
+  }
+
+  /* The grip and the menu button float over the cell padding and the label's end, so they cost
+     the label no width. */
+  .tv-drag,
+  .tv-th-menu {
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    display: inline-grid;
+    place-items: center;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    color: var(--tv-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 120ms;
+  }
+
+  .tv-drag {
+    inset-inline-start: 0;
+    width: calc(var(--tv-cell-padding-x) - 1px);
+    background: transparent;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .tv-drag .tv-icon {
+    width: 12px;
+  }
+
+  .tv-drag:hover {
+    color: var(--tv-text);
+  }
+
+  .tv-th-menu {
+    inset-inline-end: 6px;
+    width: 22px;
+    background: var(--tv-header-bg);
+    box-shadow: -8px 0 6px var(--tv-header-bg);
+  }
+
+  .tv-th[data-align='end'] .tv-th-menu {
+    inset-inline-start: var(--tv-cell-padding-x);
+    inset-inline-end: auto;
+    box-shadow: 8px 0 6px var(--tv-header-bg);
+  }
+
+  .tv-th-menu:hover {
+    background: var(--tv-bg-hover);
+    color: var(--tv-text);
+  }
+
+  .tv-th:hover :is(.tv-drag, .tv-th-menu),
+  .tv-drag:focus-visible,
+  .tv-th-menu:focus-visible,
+  .tv-th-menu[aria-expanded='true'],
+  .tv-th[data-filtered] .tv-th-menu {
+    opacity: 1;
+  }
+
+  .tv-th[data-filtered] .tv-th-menu {
+    color: var(--tv-accent);
+  }
+
+  .tv-th[data-dragging] {
+    z-index: 4;
+    opacity: 0.9;
+    box-shadow: var(--tv-shadow);
+  }
+
+  @media (hover: none) {
+    .tv-drag,
+    .tv-th-menu {
+      opacity: 1;
+    }
+  }
+
+  .tv-resizer {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .tv-resizer::after {
+    content: '';
+    position: absolute;
+    inset-block: 28%;
+    inset-inline-end: 3px;
+    width: 2px;
+    border-radius: 1px;
+    background: transparent;
+    transition: background-color 120ms;
+  }
+
+  .tv-th:hover .tv-resizer::after {
+    background: var(--tv-border-strong);
+  }
+
+  .tv-resizer:hover::after,
+  .tv-resizer:focus-visible::after,
+  .tv-resizer[data-resizing]::after {
+    inset-block: 0;
+    background: var(--tv-accent);
+  }
+
+  /* Popovers and menus */
+
+  .tv-popover {
+    z-index: 50;
+    min-width: 200px;
+    max-width: min(360px, calc(100vw - 16px));
+    max-height: min(480px, calc(100vh - 16px));
+    overflow: auto;
+    padding: 4px;
+    border: 1px solid var(--tv-border);
+    border-radius: var(--tv-radius);
+    background: var(--tv-bg);
+    color: var(--tv-text);
+    box-shadow: var(--tv-shadow);
+    font-size: var(--tv-font-size);
+    font-weight: 400;
+    white-space: normal;
+  }
+
+  .tv-menu {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tv-menu-item {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .tv-menu-item:hover:not(:disabled),
+  .tv-menu-item:focus-visible {
+    background: var(--tv-bg-hover);
+  }
+
+  .tv-menu-item:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .tv-menu-section {
+    margin-top: 4px;
+    padding: 10px 8px 6px;
+    border-top: 1px solid var(--tv-border);
+  }
+
+  .tv-menu-heading {
+    margin: 0 0 8px;
+    color: var(--tv-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .tv-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .tv-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+    padding: 0 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .tv-check:hover {
+    background: var(--tv-bg-hover);
+  }
+
+  .tv-count {
+    margin-inline-start: auto;
+    color: var(--tv-text-muted);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tv-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .tv-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--tv-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .tv-view-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tv-segmented {
+    display: flex;
+    margin: 0;
+    padding: 10px 8px 4px;
+    border: 0;
+    border-top: 1px solid var(--tv-border);
+  }
+
+  .tv-segmented legend {
+    float: left;
+    width: 100%;
+    margin-bottom: 8px;
+    color: var(--tv-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .tv-segmented label {
+    flex: 1;
+  }
+
+  .tv-segmented input {
+    position: absolute;
+    opacity: 0;
+  }
+
+  .tv-segmented span {
+    display: block;
+    padding: 5px 0;
+    border: 1px solid var(--tv-border-strong);
+    font-size: 0.8125rem;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .tv-segmented label:first-of-type span {
+    border-start-start-radius: var(--tv-radius-control);
+    border-end-start-radius: var(--tv-radius-control);
+  }
+
+  .tv-segmented label:last-of-type span {
+    border-start-end-radius: var(--tv-radius-control);
+    border-end-end-radius: var(--tv-radius-control);
+  }
+
+  .tv-segmented label + label span {
+    border-inline-start: 0;
+  }
+
+  .tv-segmented input:checked + span {
+    border-color: var(--tv-accent);
+    background: var(--tv-accent);
+    color: var(--tv-accent-text);
+  }
+
+  .tv-segmented input:focus-visible + span {
+    outline: 2px solid var(--tv-focus);
+    outline-offset: 2px;
+  }
+
+  .tv-view-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 8px 6px;
+    border-top: 1px solid var(--tv-border);
+  }
+
+  /*
+   * Theme presets: <DataTable theme="ink" />. Variables only (ledger also changes lines), so
+   * your own --tv-* values still apply on top. Every text colour meets WCAG AA in both schemes.
+   */
+
+  /* Ink: monochrome zinc with a black accent. */
+  .tv-root[data-tv-theme='ink'] {
+    --tv-text: light-dark(#18181b, #fafafa);
+    --tv-text-muted: light-dark(#52525b, #a1a1aa);
+    --tv-bg: light-dark(#ffffff, #09090b);
+    --tv-bg-subtle: light-dark(#f4f4f5, #18181b);
+    --tv-bg-hover: light-dark(#f4f4f5, #1c1c20);
+    --tv-bg-selected: light-dark(#ececef, #27272a);
+    --tv-border: light-dark(#e4e4e7, #27272a);
+    --tv-border-strong: light-dark(#d4d4d8, #3f3f46);
+    --tv-accent: light-dark(#18181b, #fafafa);
+    --tv-accent-text: light-dark(#ffffff, #09090b);
+    --tv-danger: light-dark(#dc2626, #f87171);
+    --tv-danger-bg: light-dark(#fef2f2, #2a1215);
+    --tv-shadow-color: light-dark(rgb(9 9 11 / 0.14), rgb(0 0 0 / 0.6));
+  }
+
+  /* Basil: green on cool paper. */
+  .tv-root[data-tv-theme='basil'] {
+    --tv-text: light-dark(#1f2a24, #e9efe9);
+    --tv-text-muted: light-dark(#56645b, #9aaa9f);
+    --tv-bg: light-dark(#fbfcfa, #121714);
+    --tv-bg-subtle: light-dark(#f1f5f0, #19201b);
+    --tv-bg-hover: light-dark(#ebf1ea, #1f2822);
+    --tv-bg-selected: light-dark(#e3efe4, #213426);
+    --tv-border: light-dark(#dfe7dd, #29332c);
+    --tv-border-strong: light-dark(#c7d3c5, #3b473e);
+    --tv-accent: light-dark(#2f6b45, #7cc493);
+    --tv-accent-text: light-dark(#ffffff, #0f1511);
+    --tv-shadow-color: light-dark(rgb(31 42 36 / 0.14), rgb(0 0 0 / 0.55));
+  }
+
+  /* Harbor: slate with a blue accent, the familiar SaaS look. */
+  .tv-root[data-tv-theme='harbor'] {
+    --tv-text: light-dark(#0f172a, #f1f5f9);
+    --tv-text-muted: light-dark(#475569, #94a3b8);
+    --tv-bg: light-dark(#ffffff, #0b1220);
+    --tv-bg-subtle: light-dark(#f8fafc, #111a2c);
+    --tv-bg-hover: light-dark(#f1f5f9, #172236);
+    --tv-bg-selected: light-dark(#eff6ff, #172a4a);
+    --tv-border: light-dark(#e2e8f0, #1e293b);
+    --tv-border-strong: light-dark(#cbd5e1, #334155);
+    --tv-accent: light-dark(#2563eb, #60a5fa);
+    --tv-accent-text: light-dark(#ffffff, #0b1220);
+    --tv-danger: light-dark(#dc2626, #f87171);
+    --tv-danger-bg: light-dark(#fef2f2, #2a1215);
+    --tv-shadow-color: light-dark(rgb(15 23 42 / 0.14), rgb(0 0 0 / 0.55));
+  }
+
+  /* Ledger: the default colours as an account book: square, ruled, striped, figures in mono. */
+  .tv-root[data-tv-theme='ledger'] {
+    --tv-radius: 2px;
+  }
+
+  .tv-root[data-tv-theme='ledger'] :is(.tv-td, .tv-th) + :is(.tv-td, .tv-th) {
+    border-inline-start: 1px solid var(--tv-border);
+  }
+
+  .tv-root[data-tv-theme='ledger'] .tv-tbody .tv-tr:nth-child(even) > .tv-td {
+    background: var(--tv-bg-subtle);
+  }
+
+  .tv-root[data-tv-theme='ledger'] .tv-td[data-align='end'] {
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+    font-size: 0.8125rem;
+  }
+
+  .tv-root[data-tv-theme='ledger'] .tv-tbody .tv-tr:hover > .tv-td {
+    background: var(--tv-bg-hover);
+  }
+
+  .tv-root[data-tv-theme='ledger'] .tv-tr[data-selected] > .tv-td {
+    background: var(--tv-bg-selected);
+  }
+
+  /* Utilities */
+
+  .tv-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tv-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (forced-colors: active) {
+    .tv-tr[data-selected] > .tv-td {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+  }
+}

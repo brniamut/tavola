@@ -1,0 +1,76 @@
+---
+title: Styling
+description: Theme the table with CSS variables, override anything with your own classes.
+---
+
+import { ThemedExample } from '../../../components/themed-example.tsx';
+
+Import the stylesheet once:
+
+```ts
+import '@tavola/react/styles.css';
+```
+
+It is plain CSS, inside the cascade layer `tavola`. Styles outside a layer, and styles in layers declared after it, always win. In practice your own classes, CSS modules and Tailwind utilities override the table without `!important` or specificity tricks. Nothing is injected at runtime, so it works with server rendering and a strict Content Security Policy.
+
+## Theme with variables
+
+Set variables on `.tv-root` or any ancestor:
+
+```css
+.tv-root {
+  --tv-accent: #0f766e;
+  --tv-radius: 0;
+  --tv-header-bg: light-dark(#ecfdf5, #022c22);
+}
+```
+
+<ThemedExample client:only="react" />
+
+| Variable                                                         | Purpose                                                    |
+| ---------------------------------------------------------------- | ---------------------------------------------------------- |
+| `--tv-font`, `--tv-font-size`                                    | Typography; the font is inherited by default.              |
+| `--tv-text`, `--tv-text-muted`                                   | Text colours.                                              |
+| `--tv-bg`, `--tv-bg-subtle`, `--tv-bg-hover`, `--tv-bg-selected` | Backgrounds.                                               |
+| `--tv-header-bg`                                                 | Header background.                                         |
+| `--tv-border`, `--tv-border-strong`                              | Lines and input borders.                                   |
+| `--tv-accent`, `--tv-accent-text`                                | Active sort, checkboxes, links, selected density.          |
+| `--tv-danger`, `--tv-focus`, `--tv-shadow`                       | Destructive actions, focus ring, popovers and pin shadows. |
+| `--tv-radius`                                                    | Corner radius.                                             |
+| `--tv-row-height`, `--tv-cell-padding-x`                         | Set per density; override to fine-tune.                    |
+
+## Dark mode
+
+The colours use `light-dark()`, so the table follows the page's `color-scheme`. Set `color-scheme: light dark` on the page to follow the system, or `color-scheme: dark` on the table or an ancestor to force it. This site switches with its theme toggle.
+
+## Your own classes
+
+Add classes per part with `classNames`, or per column with the column's `className`, which can depend on the row:
+
+```tsx
+<DataTable classNames={{ root: 'shadow-sm', headerCell: 'uppercase tracking-wide' }} /* ... */ />;
+
+col.number('balance', {
+  className: (account) => (account.balance < 0 ? 'text-red-600' : undefined),
+});
+```
+
+Parts: `root`, `toolbar`, `scroller`, `table`, `headerRow`, `headerCell`, `row`, `cell`, `footer`.
+
+## State attributes
+
+The table exposes its state as data attributes, for your own selectors:
+
+| Attribute                                         | On                    |
+| ------------------------------------------------- | --------------------- |
+| `[data-sorted="asc"\|"desc"]`, `[data-filtered]`  | header cells          |
+| `[data-selected]`                                 | rows                  |
+| `[data-pinned="start"\|"end"]`, `[data-pin-edge]` | pinned cells          |
+| `[data-density]`, `[data-loading]`                | the root              |
+| `[data-align]`                                    | header and body cells |
+
+```css
+.tv-root [data-selected] > td {
+  background: var(--brand-50);
+}
+```

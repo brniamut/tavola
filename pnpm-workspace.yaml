@@ -1,0 +1,13 @@
+packages:
+  - packages/*
+  - apps/*
+  - compat/*
+
+# Dependencies allowed to run install scripts (pnpm 11+). Everything else is blocked.
+allowBuilds:
+  esbuild: true
+  lefthook: true
+
+# pnpm 11+ reads settings here, not from .npmrc.
+engineStrict: true
+saveExact: true

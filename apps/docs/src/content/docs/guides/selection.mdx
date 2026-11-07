@@ -1,0 +1,51 @@
+---
+title: Selection and bulk actions
+description: Select rows across pages and act on them.
+---
+
+Giving `bulkActions` turns on row selection. Each action becomes a button in the bar that appears while rows are selected:
+
+```tsx
+<DataTable
+  bulkActions={[
+    { label: 'Export', onAction: (selection) => exportPeople(selection.ids) },
+    {
+      label: 'Delete',
+      danger: true,
+      onAction: async (selection) => {
+        await deletePeople(
+          selection.allMatching ? { query: selection.query } : { ids: selection.ids },
+        );
+        selection.clear();
+      },
+    },
+  ]}
+  /* ... */
+/>
+```
+
+To select without actions, for example to read the selection elsewhere, use `selectable` and `onSelectionChange`.
+
+## The selection object
+
+| Field         | Meaning                                                                         |
+| ------------- | ------------------------------------------------------------------------------- |
+| `ids`         | Ids of the selected rows, also those on other pages.                            |
+| `rows`        | The selected rows that are loaded. In server mode, rows on other pages are not. |
+| `allMatching` | The user chose "select all" across pages in server mode.                        |
+| `query`       | The query at the time of the action: the filters that define "all matching".    |
+| `clear()`     | Clears the selection, for example after a delete.                               |
+
+While an action's promise is pending, the bar is disabled, so it cannot run twice.
+
+## How selecting works
+
+- Selection is keyed by `getRowId`, so it survives sorting, filtering and paging.
+- Shift-click a checkbox to select the range since the last one.
+- The header checkbox selects the current page. The bar then offers to select every matching row.
+- In client mode that selects all filtered rows. In server mode the table cannot load them, so it sets `allMatching` and your action applies to everything matching `query` on the server.
+- Changing filters or search turns `allMatching` off again, because "all" then means other rows.
+
+## Row clicks
+
+`onRowClick` fires for clicks on a row, but not for clicks on its checkbox, links, buttons or menus, so a clickable row and its controls do not get in each other's way.

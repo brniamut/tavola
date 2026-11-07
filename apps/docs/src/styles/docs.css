@@ -1,0 +1,117 @@
+/* Tavola's brand on Starlight: warm paper-and-ink greys, terracotta accent, Fraunces headings. */
+:root {
+  --sl-color-accent-low: #3a2016;
+  --sl-color-accent: #e8875e;
+  --sl-color-accent-high: #f6d3c3;
+  --sl-color-white: #f2ede6;
+  --sl-color-gray-1: #e6dfd5;
+  --sl-color-gray-2: #c8bfb4;
+  --sl-color-gray-3: #a39a8e;
+  --sl-color-gray-4: #6b6157;
+  --sl-color-gray-5: #4a443d;
+  --sl-color-gray-6: #24201d;
+  --sl-color-black: #1b1816;
+  --tv-docs-heading: 'Fraunces Variable', Georgia, serif;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #f6d9cc;
+  --sl-color-accent: #a84b25;
+  --sl-color-accent-high: #5e2611;
+  --sl-color-white: #2a2420;
+  --sl-color-gray-1: #3a332d;
+  --sl-color-gray-2: #4d453e;
+  --sl-color-gray-3: #6b6157;
+  --sl-color-gray-4: #8f8476;
+  --sl-color-gray-5: #d6ccbd;
+  --sl-color-gray-6: #f2ece4;
+  --sl-color-gray-7: #f8f4ee;
+  --sl-color-black: #fefcf9;
+}
+
+:is(h1, h2, h3, .site-title, .hero h1) {
+  font-family: var(--tv-docs-heading);
+  font-variation-settings: 'SOFT' 100;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.site-title {
+  gap: 0.5rem;
+  font-size: 1.35rem;
+}
+
+.site-title img {
+  height: 1.6rem;
+  width: auto;
+}
+
+/* Docs-only styles. The table itself is styled by @tavola/react/styles.css. */
+.example {
+  margin-block: 1.5rem;
+}
+
+.example .tv-root {
+  height: 520px;
+}
+
+/* Starlight sets its own font sizes on content; the table keeps its own. */
+.sl-markdown-content .example :is(table, th, td, button, input, select) {
+  margin: 0;
+  font-size: inherit;
+}
+
+.sl-markdown-content .example table {
+  display: table;
+  width: 100%;
+  overflow: visible;
+}
+
+/* The theming example: an accent colour, square corners and denser rows. */
+.themed .tv-root {
+  --tv-accent: #0f766e;
+  --tv-radius: 0;
+  --tv-header-bg: light-dark(#ecfdf5, #022c22);
+  height: 420px;
+}
+
+/* The theme switcher above the showcase table. */
+.theme-switch {
+  display: inline-flex;
+  margin: 0;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 8px;
+}
+
+.theme-switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.theme-switch span {
+  display: block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+  cursor: pointer;
+}
+
+.theme-switch input:checked + span {
+  background: var(--sl-color-accent);
+  color: var(--sl-color-black);
+}
+
+.theme-switch input:focus-visible + span {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 2px;
+}
+
+.theme-note {
+  margin-block: 0.75rem 1rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+}

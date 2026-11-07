@@ -1,0 +1,35 @@
+---
+title: Texts and accessibility
+description: Translate every text, and what the table does for keyboard and screen reader users.
+---
+
+## Texts
+
+Every text is in one object. Pass the ones you want to change, or all of them to translate. `language` also sets how numbers and dates are formatted:
+
+```tsx
+<DataTable
+  locale={{
+    language: 'nl-NL',
+    search: 'Zoeken',
+    columns: 'Kolommen',
+    selected: (count) => `${count} geselecteerd`,
+    range: (first, last, total) =>
+      total === null ? `${first}-${last}` : `${first}-${last} van ${total}`,
+  }}
+  /* ... */
+/>
+```
+
+The full list, with the English defaults, is exported as `defaultLocale`. TypeScript tells you the name and signature of each text.
+
+## Accessibility
+
+- A real `<table>` with column headers, `aria-sort` on the sorted column and an accessible name from `label`.
+- Every control has a label: checkboxes ("Select row", "Select all rows on this page"), header menus, drag handles, resize handles and pagination buttons.
+- Menus and filter panels open below their button, close on Escape and return focus to the button. In menus the arrow keys move between items.
+- **Reorder columns with the keyboard**: focus a header's drag handle, press Space, move with the arrow keys, press Space to drop. Escape cancels.
+- **Resize with the keyboard**: focus a header's resize handle and press the left and right arrow keys.
+- The selection count and the page range are announced when they change.
+- Shift-click selects a range of rows.
+- Animations respect `prefers-reduced-motion`, and selected rows stay visible in forced-colours (high contrast) mode.
