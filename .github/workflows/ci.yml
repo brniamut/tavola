@@ -124,6 +124,8 @@ jobs:
 
   docs-deploy:
     needs: docs-build
+    # Run whenever the build ran and succeeded, also when the release job was skipped.
+    if: always() && needs.docs-build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       pages: write
