@@ -1,6 +1,6 @@
 {
   "name": "@tavola/react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "An admin data table for React: sorting, filters, column picker, drag-to-reorder, resizing, pinning, selection and saved layouts, on TanStack Table.",
   "keywords": [
     "admin",
