@@ -133,23 +133,67 @@ test('arranges columns in the column picker, applied only on Apply', async ({ pa
     await page.getByRole('button', { name: 'Columns', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: 'Choose columns' });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole('searchbox', { name: 'Find a column' })).toBeFocused();
     return dialog;
   };
   let dialog = await open();
-  await dialog.getByRole('checkbox', { name: 'Email' }).uncheck();
+  await dialog.getByRole('button', { name: 'Remove Email' }).click();
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   expect(await headers(page)).toContain('Email');
 
   dialog = await open();
-  await dialog.getByRole('checkbox', { name: 'Email' }).uncheck();
+  await dialog.getByRole('button', { name: 'Remove Email' }).click();
+  await expect(dialog.getByRole('button', { name: 'Add Email' })).toBeFocused();
+  await dialog.getByRole('button', { name: 'Add Country' }).click();
   await dialog.getByRole('button', { name: 'Move up Status' }).click();
-  await expect(dialog.getByRole('button', { name: 'Move up Status' })).toBeFocused();
+  // Status is now first of the unpinned columns: its up arrow is disabled, so focus moves down.
+  await expect(dialog.getByRole('button', { name: 'Move down Status' })).toBeFocused();
   await dialog.getByRole('button', { name: 'Apply' }).click();
   await expect(dialog).toBeHidden();
   const order = await headers(page);
   expect(order).not.toContain('Email');
+  expect(order).toContain('Country');
   expect(order.indexOf('Status')).toBeLessThan(order.indexOf('Role'));
   await expect(page.getByRole('button', { name: 'Columns', exact: true })).toBeFocused();
+});
+
+test('drags columns in the column picker, with the mouse and the keyboard', async ({ page }) => {
+  await page.getByRole('button', { name: 'Columns', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Choose columns' })).toBeVisible();
+  // CSS locators while a drag runs: Playwright's role queries crash its Firefox build mid-drag.
+  const dialog = page.locator('dialog.tv-dialog');
+  const names = (): Promise<string[]> =>
+    dialog.locator('.tv-shown-list .tv-shown-row .tv-column-name').allInnerTexts();
+  const row = (name: string): Locator =>
+    dialog
+      .locator('.tv-shown-row')
+      .filter({ has: page.locator('.tv-column-name', { hasText: name }) });
+
+  const from = await centre(row('Team').locator('.tv-shown-grip'));
+  const to = await centre(row('Email'));
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x, from.y - 12, { steps: 6 });
+  await page.mouse.move(to.x, to.y - 8, { steps: 30 });
+  await page.waitForTimeout(250);
+  await page.mouse.up();
+  await expect.poll(async () => (await names()).indexOf('Team')).toBe(1);
+  // The drop animation keeps an empty placeholder in the list for a moment.
+  await expect.poll(names).not.toContain('');
+
+  // Space picks up, the arrows move, Space drops. Escape during a drag cancels only the drag.
+  const before = await names();
+  const grip = row('Role').locator('.tv-shown-grip');
+  await grip.focus();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  await expect(dialog).toHaveAttribute('open', '');
+  await expect.poll(names).toEqual(before);
+  await grip.focus();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('Space');
+  await expect.poll(async () => (await names()).indexOf('Role')).toBe(before.indexOf('Role') - 1);
 });

@@ -20,12 +20,19 @@ function headers(): string[] {
   return screen.getAllByRole('columnheader').map((header) => header.textContent ?? '');
 }
 
-/** The column names listed in the picker, in order. */
-function listed(): string[] {
-  const list = screen.getByRole('list', { name: 'Columns' });
+/** The shown columns in the picker, in order. */
+function shown(): string[] {
+  const list = screen.getByRole('list', { name: /^Shown/ });
   return within(list)
-    .getAllByRole('checkbox')
-    .map((box) => box.closest('label')?.textContent ?? '');
+    .getAllByRole('listitem')
+    .map((item) => item.querySelector('.tv-column-name')?.textContent ?? '');
+}
+
+/** The columns the picker offers to add. */
+function addable(): string[] {
+  return screen
+    .queryAllByRole('button', { name: /^Add / })
+    .map((button) => (button.getAttribute('aria-label') ?? '').replace('Add ', ''));
 }
 
 /**
@@ -38,31 +45,43 @@ async function openPicker(): Promise<HTMLElement> {
 }
 
 describe('column picker', () => {
-  it('lists every column in display order, hidden ones too, with group and state', async () => {
+  it('lists shown columns in display order and hidden ones, grouped, to add', async () => {
     render(<DataTable columns={columns} data={users} getRowId={getRowId} />);
     await openPicker();
-    expect(listed()).toEqual(['Name', 'Email', 'Role', 'Logins', 'Team']);
-    const name = screen.getByRole('checkbox', { name: 'Name' });
-    expect((name as HTMLInputElement).disabled).toBe(true);
-    expect(name.getAttribute('aria-describedby')).toBeTruthy();
+    expect(shown()).toEqual(['Name', 'Email', 'Role', 'Logins']);
+    expect(screen.getByRole('heading', { name: 'Shown (4)' })).toBeTruthy();
+    expect(addable()).toEqual(['Team']);
+    expect(screen.getByRole('heading', { name: 'Person' })).toBeTruthy();
     expect(screen.getByText('Person · Always shown')).toBeTruthy();
-    expect(screen.getByRole<HTMLInputElement>('checkbox', { name: 'Team' }).checked).toBe(false);
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Remove Name' }).disabled).toBe(
+      true,
+    );
   });
 
   it('keeps changes in a draft until Apply, and drops them on Cancel', async () => {
     render(<DataTable columns={columns} data={users} getRowId={getRowId} />);
     await openPicker();
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Email' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Email' }));
     expect(headers()).toContain('Email');
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(headers()).toContain('Email');
 
     await openPicker();
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Email' }));
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Team' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Email' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Add Team' }));
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(headers()).toEqual(['Name', 'Role', 'Logins', 'Team']);
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('moves focus to the counterpart button, so a remove is undone in one keystroke', async () => {
+    render(<DataTable columns={columns} data={users} getRowId={getRowId} />);
+    await openPicker();
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Email' }));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Add Email' }));
+    await userEvent.keyboard('{Enter}');
+    expect(shown()).toEqual(['Name', 'Role', 'Logins', 'Email']);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Remove Email' }));
   });
 
   it('moves columns with the arrow buttons and keeps focus on the moved column', async () => {
@@ -72,17 +91,19 @@ describe('column picker', () => {
       true,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Move up Role' }));
-    expect(listed()).toEqual(['Name', 'Role', 'Email', 'Logins', 'Team']);
+    expect(shown()).toEqual(['Name', 'Role', 'Email', 'Logins']);
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Move up Role' }));
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(headers()).toEqual(['Name', 'Role', 'Email', 'Logins']);
   });
 
-  it('finds columns by header or group', async () => {
+  it('finds columns to add by header or group', async () => {
     render(<DataTable columns={columns} data={users} getRowId={getRowId} />);
     await openPicker();
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Role' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Logins' }));
     await userEvent.type(screen.getByRole('searchbox', { name: 'Find a column' }), 'access');
-    expect(listed()).toEqual(['Role', 'Logins']);
+    expect(addable()).toEqual(['Role', 'Logins']);
     await userEvent.clear(screen.getByRole('searchbox', { name: 'Find a column' }));
     await userEvent.type(screen.getByRole('searchbox', { name: 'Find a column' }), 'zzz');
     expect(screen.getByText('No columns match')).toBeTruthy();
@@ -124,7 +145,7 @@ describe('column picker', () => {
     // The search box is debounced: wait until the rows are filtered.
     await waitFor(() => expect(screen.getAllByRole('row')).toHaveLength(2));
     await openPicker();
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Email' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Email' }));
     await userEvent.type(screen.getByRole('textbox', { name: 'Save as view' }), 'Lean');
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     const [saved] = (onViewsChange.mock.calls[0]?.[0] ?? []) as SavedView[];
@@ -135,7 +156,7 @@ describe('column picker', () => {
     await userEvent.clear(screen.getByRole('searchbox', { name: 'Search' }));
     await waitFor(() => expect(screen.getAllByRole('row')).toHaveLength(users.length + 1));
     await openPicker();
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Email' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Add Email' }));
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(headers()).toContain('Email');
 

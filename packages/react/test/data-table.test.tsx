@@ -62,7 +62,7 @@ describe('DataTable in client mode', () => {
       <DataTable id="users" columns={columns} data={users} getRowId={getRowId} />,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Columns' }));
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Email' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Email' }));
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(screen.queryByRole('columnheader', { name: /Email/ })).toBeNull();
     unmount();

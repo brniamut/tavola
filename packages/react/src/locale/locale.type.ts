@@ -16,6 +16,17 @@ export interface Locale {
   presets: string;
   /** Column picker: placeholder of the search box. */
   findColumn: string;
+  /** Column picker: heading of the shown columns, given their number. */
+  shownColumns: (count: number) => string;
+  /** Column picker: heading of the hidden columns. */
+  addColumns: string;
+  /** Column picker: heading of hidden columns without a group. */
+  otherColumns: string;
+  /** Column picker: every column is shown, so there is nothing to add. */
+  allColumnsShown: string;
+  /** Column picker: labels of the add and remove buttons; the column header follows. */
+  addColumn: string;
+  removeColumn: string;
   /** Column picker: no column matches the search. */
   noColumnsFound: string;
   /** Column picker: a column that may not be hidden. */

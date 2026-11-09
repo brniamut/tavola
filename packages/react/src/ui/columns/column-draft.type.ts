@@ -20,6 +20,6 @@ export interface ColumnListRow {
   region: 'start' | 'center' | 'end';
   /** Its index among the columns that can move in that region, or -1 when it cannot move. */
   index: number;
-  /** The ids of the columns that can move in that region and match the search. */
+  /** The ids of the shown columns that can move in that region. */
   movable: readonly string[];
 }
