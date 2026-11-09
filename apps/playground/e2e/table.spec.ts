@@ -171,10 +171,15 @@ test('drags columns in the column picker, with the mouse and the keyboard', asyn
 
   const from = await centre(row('Team').locator('.tv-shown-grip'));
   const to = await centre(row('Email'));
+  // Press, move until the drag has visibly begun, travel, settle over the target, release.
+  // Waiting for the lifted row keeps slow machines (WebKit on CI) in step.
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
   await page.mouse.move(from.x, from.y - 12, { steps: 6 });
-  await page.mouse.move(to.x, to.y - 8, { steps: 30 });
+  // The lifted row and dnd-kit's placeholder copy both carry the attribute.
+  await expect(dialog.locator('.tv-shown-row[data-dragging]').first()).toBeVisible();
+  await page.mouse.move(to.x, to.y - 8, { steps: 40 });
+  await page.mouse.move(to.x, to.y - 12, { steps: 4 });
   await page.waitForTimeout(250);
   await page.mouse.up();
   await expect.poll(async () => (await names()).indexOf('Team')).toBe(1);
