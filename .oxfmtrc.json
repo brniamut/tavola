@@ -1,4 +1,10 @@
 {
   "singleQuote": true,
-  "ignorePatterns": ["pnpm-lock.yaml", ".pnpm-store/**", "CHANGELOG.md", "**/dist/**"]
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    ".pnpm-store/**",
+    "CHANGELOG.md",
+    "**/dist/**",
+    ".release-please-manifest.json"
+  ]
 }
