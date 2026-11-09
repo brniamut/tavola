@@ -6,7 +6,7 @@ description: Column picker, presets, saved views, reordering, resizing, pinning,
 Users arrange the columns themselves:
 
 - **Show, hide and order** in the column picker behind the Columns button. See below.
-- **Reorder** by dragging a header's grip, which appears on hover, or with the arrows in the column picker. Columns move within their region: pinned to the start, unpinned, or pinned to the end.
+- **Reorder** by dragging a header's grip, which appears on hover, or in the column picker. Columns move within their region: pinned to the start, unpinned, or pinned to the end.
 - **Resize** by dragging a header's right edge. Double-click the edge to restore the default width.
 - **Pin and unpin** from a header's menu. Pinned columns stay in place while the table scrolls sideways; row actions always stay at the very end.
 - **Density**: compact, normal or comfortable rows, from the button next to Columns.
@@ -15,9 +15,14 @@ You set the starting point per column with `pin`, `hidden`, `size` and `defaultD
 
 ## The column picker
 
-The Columns button opens a dialog that lists every column in its current order, hidden ones included. Each row shows the column's group and why it behaves differently: always shown, pinned, or hidden because the table is too narrow. Users tick columns on and off, move them with the arrows (no dragging needed, so it works from the keyboard), search by header or group, and press Apply. Cancel or Escape drops the changes; "Restore defaults" goes back to the columns as you defined them.
+The Columns button opens a dialog with two panes:
 
-Give columns a `group` when a table has many of them. The picker shows it under the header and the search finds columns by it:
+- **Shown**, on the left: the visible columns in table order. Drag a row by its handle, or use the arrows, to change the order; with the keyboard, focus the handle, press Space, move with the arrow keys and press Space again (Escape cancels). The cross hides a column. Each row shows the column's group and why it behaves differently: always shown, pinned, or hidden because the table is too narrow.
+- **Add columns**, on the right: the hidden columns, grouped and searchable. The plus adds a column at the end of the list.
+
+Focus follows the column: hiding one moves focus to its plus button and adding one to its cross, so either is undone with one keystroke. Nothing changes until Apply; Cancel or Escape drops the changes, and "Restore defaults" goes back to the columns as you defined them.
+
+Give columns a `group` when a table has many of them. The picker groups the columns to add by it, shows it under the header, and the search finds columns by it:
 
 ```ts
 col.text('street', { group: 'Address' }),

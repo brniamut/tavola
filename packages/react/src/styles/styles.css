@@ -1020,7 +1020,7 @@
   /* The column picker dialog */
 
   .tv-dialog {
-    width: min(600px, calc(100vw - 32px));
+    width: min(880px, calc(100vw - 32px));
     max-height: min(760px, calc(100dvh - 32px));
     padding: 0;
     border: 1px solid var(--tv-border);
@@ -1130,55 +1130,122 @@
   }
 
   .tv-column-search {
+    flex: none;
     width: 100%;
-    min-height: 36px;
+    min-width: 0;
+    min-height: 34px;
   }
 
-  .tv-column-list {
+  /* Two panes: the shown columns and the columns to add. Side by side when there is room. */
+  .tv-panes {
+    display: grid;
     flex: 1 1 auto;
-    min-height: 140px;
-    margin: 0;
-    padding: 0;
-    overflow: auto;
+    min-height: 0;
     border: 1px solid var(--tv-border);
     border-radius: var(--tv-radius);
+  }
+
+  @media (min-width: 720px) {
+    .tv-panes {
+      grid-template-columns: 1fr 1fr;
+      height: min(30rem, calc(100dvh - 22rem));
+    }
+
+    .tv-add-pane {
+      border-inline-start: 1px solid var(--tv-border);
+    }
+  }
+
+  @media (max-width: 719.98px) {
+    .tv-dialog-body {
+      overflow: auto;
+    }
+
+    .tv-add-pane {
+      border-top: 1px solid var(--tv-border);
+    }
+  }
+
+  .tv-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    min-height: 0;
+    padding: 14px 12px 12px;
+    overflow: auto;
+  }
+
+  .tv-pane-heading,
+  .tv-add-heading {
+    margin: 0;
+    color: var(--tv-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .tv-pane-heading {
+    padding-inline: 4px;
+  }
+
+  .tv-shown-list,
+  .tv-add-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
     list-style: none;
   }
 
-  /* Signature: the selection spine marks the columns that are on. */
-  .tv-column-row {
+  /* Signature: the selection spine marks each shown column. */
+  .tv-shown-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
     align-items: center;
-    column-gap: 8px;
-    padding: 6px 8px 6px 12px;
-    border-bottom: 1px solid var(--tv-border);
+    gap: 4px;
+    min-height: 44px;
+    padding: 4px 4px 4px 2px;
+    border-radius: var(--tv-radius-control);
+    background: var(--tv-bg);
     box-shadow: inset 2px 0 0 var(--tv-accent);
+    transition: background-color 120ms;
   }
 
-  .tv-column-row:last-child {
-    border-bottom: 0;
+  .tv-shown-row:hover {
+    background: var(--tv-bg-hover);
   }
 
-  .tv-column-row[data-hidden] {
-    box-shadow: none;
+  .tv-shown-row[data-dragging] {
+    position: relative;
+    z-index: 1;
+    background: var(--tv-bg);
+    box-shadow:
+      inset 2px 0 0 var(--tv-accent),
+      var(--tv-shadow);
   }
 
-  .tv-column-row[data-hidden] .tv-column-name {
-    color: var(--tv-text-muted);
+  .tv-shown-grip {
+    width: 28px;
+    height: 28px;
+    cursor: grab;
+    touch-action: none;
   }
 
-  .tv-column-label {
-    display: flex;
-    grid-column: 1;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    cursor: pointer;
-  }
-
-  .tv-column-label:has(input:disabled) {
+  span.tv-shown-grip {
     cursor: default;
+  }
+
+  .tv-shown-row[data-dragging] .tv-shown-grip {
+    cursor: grabbing;
+  }
+
+  .tv-shown-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .tv-column-name {
@@ -1188,23 +1255,53 @@
   }
 
   .tv-column-meta {
-    grid-column: 1;
-    padding-inline-start: 26px;
+    overflow: hidden;
     color: var(--tv-text-muted);
     font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .tv-column-moves {
     display: flex;
-    grid-row: 1 / span 2;
-    grid-column: 2;
     gap: 2px;
   }
 
-  .tv-column-empty {
-    padding: 24px;
+  .tv-add-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tv-add-heading {
+    margin-bottom: 4px;
+    padding-inline: 4px;
+    font-size: 0.6875rem;
+  }
+
+  .tv-add-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 36px;
+    padding: 2px 4px 2px 8px;
+    border-radius: var(--tv-radius-control);
+  }
+
+  .tv-add-row:hover {
+    background: var(--tv-bg-hover);
+  }
+
+  .tv-add-row .tv-icon-button {
+    color: var(--tv-accent);
+  }
+
+  .tv-pane-empty {
+    margin: 0;
+    padding: 12px 4px;
     color: var(--tv-text-muted);
-    text-align: center;
+    font-size: 0.8125rem;
   }
 
   .tv-view-fields {

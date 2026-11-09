@@ -5,9 +5,12 @@ import { Icon } from '../common/icon.tsx';
 import { useModel } from '../common/model-context.ts';
 import { applyDraft } from './apply-draft.ts';
 import type { ColumnDraft } from './column-draft.type.ts';
-import { ColumnList } from './column-list.tsx';
+import { AddPane } from './add-pane.tsx';
 import { PresetButtons } from './preset-buttons.tsx';
+import { ShownPane } from './shown-pane.tsx';
+import { useRefocus } from './use-refocus.ts';
 import { ViewFields } from './view-fields.tsx';
+import type { ViewLayout } from '../../views/saved-view.type.ts';
 
 /**
  * The title, the line under it and the close button.
@@ -34,6 +37,27 @@ function EditorHeader({
         <Icon name="close" />
       </button>
     </header>
+  );
+}
+
+/**
+ * The two panes side by side: the shown columns, and the columns to add.
+ * @param props The draft columns and a function that receives changes.
+ * @returns The panes.
+ */
+function Panes({
+  layout,
+  onChange,
+}: {
+  layout: ViewLayout;
+  onChange: (layout: ViewLayout) => void;
+}): ReactElement {
+  const { containerRef, focusLater } = useRefocus();
+  return (
+    <div ref={containerRef} className="tv-panes">
+      <ShownPane layout={layout} onChange={onChange} focusLater={focusLater} />
+      <AddPane layout={layout} onChange={onChange} focusLater={focusLater} />
+    </div>
   );
 }
 
@@ -72,7 +96,7 @@ export function ColumnEditor({
       <EditorHeader titleId={titleId} onClose={onDone} />
       <div className="tv-dialog-body">
         <PresetButtons layout={draft.layout} onPick={(layout) => update({ layout })} />
-        <ColumnList layout={draft.layout} onChange={(layout) => update({ layout })} />
+        <Panes layout={draft.layout} onChange={(layout) => update({ layout })} />
         {model.setViews && <ViewFields draft={draft} onChange={update} />}
       </div>
       <footer className="tv-dialog-footer">

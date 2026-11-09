@@ -39,6 +39,7 @@ export function ColumnDialog({
       className="tv-dialog"
       aria-labelledby={titleId}
       onClose={onClose}
+      onCancel={(event) => 'dragging' in event.currentTarget.dataset && event.preventDefault()}
       onClick={(event) => event.target === event.currentTarget && onClose()}
     >
       {open && <ColumnEditor titleId={titleId} onDone={onClose} />}

@@ -16,6 +16,7 @@ const PATHS = {
   chevronUp: 'M3 10l5-5 5 5',
   chevronDown: 'M3 6l5 5 5-5',
   density: 'M2.5 4h11M2.5 8h11M2.5 12h11',
+  plus: 'M8 3v10M3 8h10',
   trash: 'M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.5 8.5h6l.5-8.5',
   pin: 'M8 10v4M5 2.5h6M6 2.5v4l-2 3h8l-2-3v-4',
   table: 'M2.5 3.5h11v9h-11zM2.5 6.5h11M6.5 6.5v6',
