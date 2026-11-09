@@ -1,20 +1,20 @@
-import { useCallback, type ReactElement } from 'react';
+import { useCallback, useState, type ReactElement } from 'react';
 
 import type { DataTableProps } from './table/data-table-props.type.ts';
 import { useTavola } from './table/use-tavola.ts';
 import { TableBody } from './ui/body/table-body.tsx';
 import { columnRegions } from './ui/common/column-regions.ts';
+import { ColumnDialog } from './ui/columns/column-dialog.tsx';
 import { cx } from './ui/common/cx.ts';
 import { ModelContext } from './ui/common/model-context.ts';
 import { pinOffsetVariables } from './ui/common/pin-offset-variables.ts';
 import { useScrollEdges } from './ui/common/use-scroll-edges.ts';
 import { ColumnDrag } from './ui/header/column-drag.tsx';
 import { TableHead } from './ui/header/table-head.tsx';
-import { FilterChips } from './ui/toolbar/filter-chips.tsx';
+import { ColumnSummary } from './ui/toolbar/column-summary.tsx';
 import { PaginationBar } from './ui/toolbar/pagination-bar.tsx';
-import { SearchInput } from './ui/toolbar/search-input.tsx';
 import { SelectionBar } from './ui/toolbar/selection-bar.tsx';
-import { ViewMenu } from './ui/toolbar/view-menu.tsx';
+import { TableToolbar } from './ui/toolbar/table-toolbar.tsx';
 
 /**
  * An admin data table: search, column filters, multi-column sort, a column picker, drag-to-reorder,
@@ -33,6 +33,8 @@ export function DataTable<TRow>(props: DataTableProps<TRow>): ReactElement {
   const { table, layout, classNames, measureScroller, total, loading } = model;
   const regions = columnRegions(table);
   const columns = [...regions.start, ...regions.center];
+  // The button that opened the column picker, or null while it is closed.
+  const [columnsOpener, setColumnsOpener] = useState<HTMLElement | null>(null);
   const trackScroll = useScrollEdges();
   const scrollerRef = useCallback(
     (element: HTMLDivElement | null) => {
@@ -49,14 +51,9 @@ export function DataTable<TRow>(props: DataTableProps<TRow>): ReactElement {
         data-tv-theme={props.theme === 'cotto' ? undefined : props.theme}
         data-loading={loading || undefined}
       >
-        <div className={cx('tv-toolbar', classNames.toolbar)}>
-          <SearchInput />
-          <FilterChips />
-          <span className="tv-spacer" />
-          {props.toolbar}
-          <ViewMenu />
-        </div>
+        <TableToolbar onOpenColumns={setColumnsOpener} />
         <SelectionBar />
+        <ColumnSummary onOpen={setColumnsOpener} />
         <div ref={scrollerRef} className={cx('tv-scroller', classNames.scroller)}>
           <ColumnDrag>
             <table
@@ -83,6 +80,7 @@ export function DataTable<TRow>(props: DataTableProps<TRow>): ReactElement {
           </ColumnDrag>
         </div>
         <PaginationBar />
+        <ColumnDialog opener={columnsOpener} onClose={() => setColumnsOpener(null)} />
       </div>
     </ModelContext.Provider>
   );

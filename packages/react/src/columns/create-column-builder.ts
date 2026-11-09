@@ -35,7 +35,7 @@ function behaviour<TRow>(
   options: DataColumnOptions<TRow, never>,
 ): Omit<
   ColumnSpec<TRow>['settings'],
-  'size' | 'minSize' | 'maxSize' | 'pin' | 'hidden' | 'className' | 'priority'
+  'size' | 'minSize' | 'maxSize' | 'pin' | 'hidden' | 'className' | 'priority' | 'group'
 > {
   const defaults = {
     sortable: true,
@@ -87,9 +87,18 @@ function pickLayout<TRow>(
   options: DataColumnOptions<TRow, never>,
 ): Pick<
   ColumnSpec<TRow>['settings'],
-  'size' | 'minSize' | 'maxSize' | 'pin' | 'hidden' | 'className' | 'priority'
+  'size' | 'minSize' | 'maxSize' | 'pin' | 'hidden' | 'className' | 'priority' | 'group'
 > {
-  const keys = ['size', 'minSize', 'maxSize', 'pin', 'hidden', 'className', 'priority'] as const;
+  const keys = [
+    'size',
+    'minSize',
+    'maxSize',
+    'pin',
+    'hidden',
+    'className',
+    'priority',
+    'group',
+  ] as const;
   return Object.fromEntries(
     keys.filter((key) => options[key] !== undefined).map((key) => [key, options[key]]),
   );

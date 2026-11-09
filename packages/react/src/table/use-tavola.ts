@@ -21,6 +21,7 @@ import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect.ts';
 import { useLatest } from './use-latest.ts';
 import { useQueryState } from './use-query-state.ts';
 import { useSelection } from './use-selection.ts';
+import { useSavedViews } from '../views/use-saved-views.ts';
 
 /** Rows per page when the developer gives no page sizes. */
 const DEFAULT_PAGE_SIZE = 25;
@@ -33,6 +34,9 @@ const NO_ROWS: never[] = [];
 
 /** No bulk actions. */
 const NO_ACTIONS: never[] = [];
+
+/** No column presets. */
+const NO_PRESETS: never[] = [];
 
 /**
  * The query a table starts with.
@@ -62,6 +66,7 @@ function useQueryAndLayout<TRow>(
   layout: TavolaModel<TRow>['layout'];
   setLayout: TavolaModel<TRow>['setLayout'];
   resetLayout: () => void;
+  defaults: TavolaModel<TRow>['defaults'];
   query: TableQuery;
   setQuery: TavolaModel<TRow>['setQuery'];
 } {
@@ -87,7 +92,7 @@ function useQueryAndLayout<TRow>(
     // Follow the saved page size when the layout loads; the query owns it afterwards.
     // oxlint-disable-next-line react/exhaustive-deps
   }, [layout.pageSize]);
-  return { layout, setLayout, resetLayout, query, setQuery };
+  return { layout, setLayout, resetLayout, defaults, query, setQuery };
 }
 
 /**
@@ -134,7 +139,8 @@ export function useTavola<TRow>(props: DataTableProps<TRow>): TavolaModel<TRow> 
   const pageSizes = props.pageSizes ?? DEFAULT_PAGE_SIZES;
   const serverMode = props.fetcher !== undefined;
   const { defs, byId } = useColumnDefs(props.columns, selectable);
-  const { layout, setLayout, resetLayout, query, setQuery } = useQueryAndLayout(props, pageSizes);
+  const queryAndLayout = useQueryAndLayout(props, pageSizes);
+  const { layout, setLayout, query, setQuery } = queryAndLayout;
 
   const server = useServerRows(props.fetcher, query, () =>
     setQuery((current) => ({ ...current, page: { ...current.page, index: 0 } })),
@@ -172,13 +178,9 @@ export function useTavola<TRow>(props: DataTableProps<TRow>): TavolaModel<TRow> 
 
   useReporting(props, table, selection);
   return useModel(props, {
+    ...queryAndLayout,
     table,
     byId,
-    query,
-    setQuery,
-    layout,
-    setLayout,
-    resetLayout,
     server,
     selection,
     selectable,
@@ -234,6 +236,7 @@ function useModel<TRow>(
     layout: TavolaModel<TRow>['layout'];
     setLayout: TavolaModel<TRow>['setLayout'];
     resetLayout: () => void;
+    defaults: TavolaModel<TRow>['defaults'];
     server: ReturnType<typeof useServerRows<TRow>>;
     selection: ReturnType<typeof useSelection<TRow>>;
     selectable: boolean;
@@ -245,6 +248,7 @@ function useModel<TRow>(
 ): TavolaModel<TRow> {
   const { table, server, selection, serverMode } = parts;
   const locale = useMemo(() => ({ ...defaultLocale, ...props.locale }), [props.locale]);
+  const saved = useSavedViews(props.id, { views: props.views, onViewsChange: props.onViewsChange });
   const formats = useMemo(
     () => ({
       number: new Intl.NumberFormat(locale.language),
@@ -265,6 +269,10 @@ function useModel<TRow>(
     allMatching: selection.allMatching,
     setAllMatching: selection.setAllMatching,
     getSelection: () => selection.build(table),
+    views: saved.views,
+    setViews: saved.setViews,
+    presets: props.columnPresets ?? NO_PRESETS,
+    columnSummary: props.columnSummary !== false,
     classNames: props.classNames ?? {},
     onRowClick: props.onRowClick,
     toolbar: props.toolbar,

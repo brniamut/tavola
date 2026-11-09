@@ -6,6 +6,7 @@ import type { Locale } from '../locale/locale.type.ts';
 import type { BulkAction, Selection, TablePart } from './data-table-props.type.ts';
 import type { TableQuery } from './table-query.type.ts';
 import type { TanStackTable } from './tanstack.type.ts';
+import type { ColumnPreset, SavedView } from '../views/saved-view.type.ts';
 
 /** Everything the table's parts need, shared through context. Internal. */
 export interface TavolaModel<TRow> {
@@ -23,6 +24,16 @@ export interface TavolaModel<TRow> {
   setLayout: (update: (current: TableLayout) => TableLayout) => void;
   /** Restores the default layout and forgets the saved one. */
   resetLayout: () => void;
+  /** The layout the columns describe, before the user changed anything. */
+  defaults: TableLayout;
+  /** Column sets offered in the column picker. */
+  presets: readonly ColumnPreset[];
+  /** The saved views. */
+  views: readonly SavedView[];
+  /** Replaces the saved views; null when views cannot be saved (no `id` and not controlled). */
+  setViews: ((views: SavedView[]) => void) | null;
+  /** Whether to show the visible-columns line while columns are hidden. */
+  columnSummary: boolean;
   /** All texts. */
   locale: Locale;
   /** Formats numbers and dates. */

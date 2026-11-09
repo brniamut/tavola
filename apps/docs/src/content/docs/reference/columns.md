@@ -36,6 +36,7 @@ const columns = defineColumns<Row>((col) => [/* columns */]);
 | `pin`         | `'start' \| 'end'`                       | all          | none                         |
 | `hidden`      | `boolean`                                | all          | `false`                      |
 | `priority`    | `number`                                 | all          | none                         |
+| `group`       | `string`                                 | all          | none                         |
 | `align`       | `'start' \| 'center' \| 'end'`           | all          | `end` for numbers            |
 | `className`   | `string \| (row) => string \| undefined` | all          | none                         |
 | `hideable`    | `boolean`                                | all          | `true` (`false` for actions) |

@@ -55,6 +55,11 @@ export interface ColumnOptionsBase<TRow> {
    * from the column picker.
    */
   priority?: number;
+  /**
+   * A group name, such as "Address" or "Billing". The column picker shows it under the header and
+   * finds the column by it, which helps when a table has many columns.
+   */
+  group?: string;
 }
 
 /** Options for a column that shows a field of the row. */
@@ -119,6 +124,6 @@ export interface ColumnSpec<TRow> {
     Required<Pick<ColumnOptionsBase<TRow>, 'hideable' | 'reorderable' | 'resizable' | 'align'>> &
     Pick<
       ColumnOptionsBase<TRow>,
-      'size' | 'minSize' | 'maxSize' | 'pin' | 'hidden' | 'className' | 'priority'
+      'size' | 'minSize' | 'maxSize' | 'pin' | 'hidden' | 'className' | 'priority' | 'group'
     >;
 }
