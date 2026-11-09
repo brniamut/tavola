@@ -51,3 +51,4 @@ export type {
   TableQuery,
 } from './table/table-query.type.ts';
 export type { TanStackTable } from './table/tanstack.type.ts';
+export type { ColumnPreset, SavedView, ViewLayout, ViewQuery } from './views/saved-view.type.ts';

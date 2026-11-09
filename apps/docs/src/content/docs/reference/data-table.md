@@ -24,6 +24,10 @@ import { DataTable } from '@tavola/react';
 | `onQueryChange`     | `(query) => void`                                     | Reports every query change.                                           |
 | `defaultQuery`      | `Partial<TableQuery>`                                 | Initial sort, filters, search or page.                                |
 | `pageSizes`         | `number[]`                                            | Page size choices; the first is the default. Default `[25, 50, 100]`. |
+| `columnPresets`     | `ColumnPreset[]`                                      | One-click column sets in the column picker.                           |
+| `views`             | `SavedView[]`                                         | Controls the saved views; pass with `onViewsChange`.                  |
+| `onViewsChange`     | `(views) => void`                                     | Reports the saved views when one is saved or deleted.                 |
+| `columnSummary`     | `boolean`                                             | "8 of 12 columns visible" while columns are hidden. Default `true`.   |
 | `defaultDensity`    | `'compact' \| 'normal' \| 'comfortable'`              | Initial row density.                                                  |
 | `onRowClick`        | `(row) => void`                                       | Row clicks, ignoring clicks on controls inside the row.               |
 | `loading`           | `boolean`                                             | Client mode: show the loading state while you fetch all rows.         |
@@ -42,6 +46,21 @@ import { DataTable } from '@tavola/react';
 | `label`    | `string`                                               | Button text.                                                             |
 | `onAction` | `(selection: Selection<Row>) => void \| Promise<void>` | Runs with the selection; the bar is disabled while a promise is pending. |
 | `danger`   | `boolean`                                              | Shown in the danger colour.                                              |
+
+## ColumnPreset
+
+| Field     | Type       | Purpose                                                                                 |
+| --------- | ---------- | --------------------------------------------------------------------------------------- |
+| `label`   | `string`   | Button text.                                                                            |
+| `columns` | `string[]` | Column ids to show, in this order. Others are hidden, except columns that may not hide. |
+
+## SavedView
+
+| Field    | Type                                     | Purpose                                           |
+| -------- | ---------------------------------------- | ------------------------------------------------- |
+| `name`   | `string`                                 | Unique per table, ignoring case and accents.      |
+| `layout` | `{ order, visibility, pinning, sizing }` | The columns.                                      |
+| `query`  | `{ sort, filters, search }`              | The query; a view always opens on the first page. |
 
 ## The escape hatch
 

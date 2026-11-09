@@ -5,6 +5,7 @@ import type { Density } from '../layout/layout.type.ts';
 import type { Locale } from '../locale/locale.type.ts';
 import type { Fetcher, TableQuery } from './table-query.type.ts';
 import type { TanStackTable } from './tanstack.type.ts';
+import type { ColumnPreset, SavedView } from '../views/saved-view.type.ts';
 
 /** The rows a bulk action applies to. */
 export interface Selection<TRow> {
@@ -86,6 +87,20 @@ export interface DataTableProps<TRow> {
   defaultQuery?: Partial<TableQuery> | undefined;
   /** Page sizes to choose from. The first is the default. */
   pageSizes?: number[] | undefined;
+  /** Column sets the user can pick with one click in the column picker. */
+  columnPresets?: ColumnPreset[] | undefined;
+  /**
+   * The saved views, to keep them yourself (on your server, per user). Pass it together with
+   * `onViewsChange`. Without it, views are kept in localStorage under `id`.
+   */
+  views?: SavedView[] | undefined;
+  /** Reports the saved views whenever the user saves or deletes one. */
+  onViewsChange?: ((views: SavedView[]) => void) | undefined;
+  /**
+   * Shows "8 of 12 columns visible" above the table while columns are hidden, with a button that
+   * opens the column picker. Default true.
+   */
+  columnSummary?: boolean | undefined;
   /** Row density to start with. */
   defaultDensity?: Density | undefined;
   /** Called when a row is clicked, outside checkboxes, menus and links. */

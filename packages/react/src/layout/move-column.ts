@@ -30,11 +30,11 @@ function reorder(
  * @param move The ids visible in that region, and the indexes to move from and to.
  * @returns The new layout, or the same layout when nothing moved.
  */
-export function moveColumn(
-  layout: TableLayout,
+export function moveColumn<TLayout extends Pick<TableLayout, 'order' | 'pinning'>>(
+  layout: TLayout,
   region: 'start' | 'center' | 'end',
   move: { visible: readonly string[]; from: number; to: number },
-): TableLayout {
+): TLayout {
   if (move.from === move.to) return layout;
   if (region === 'center') return { ...layout, order: reorder(layout.order, move.visible, move) };
   return {

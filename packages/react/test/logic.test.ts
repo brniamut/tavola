@@ -11,6 +11,8 @@ import { moveColumn } from '../src/layout/move-column.ts';
 import { LAYOUT_VERSION, reconcileLayout } from '../src/layout/reconcile-layout.ts';
 import { createStateHandlers } from '../src/table/create-state-handlers.ts';
 import type { TableQuery } from '../src/table/table-query.type.ts';
+import { applyPreset } from '../src/views/apply-preset.ts';
+import { upsertView } from '../src/views/upsert-view.ts';
 import { columns } from './fixtures.ts';
 
 const defaults = defaultLayout(columns, { density: 'normal', pageSize: 25 });
@@ -172,5 +174,36 @@ describe('createStateHandlers', () => {
       { id: 'role', value: ['admin'] },
     ]);
     expect(get().filters).toEqual({ role: ['admin'] });
+  });
+});
+
+describe('saved views', () => {
+  const specs = new Map(columns.map((spec) => [spec.id, spec]));
+  const base = {
+    order: columns.map((spec) => spec.id),
+    visibility: {},
+    pinning: { start: ['name'], end: [] },
+    sizing: { email: 200 },
+  };
+
+  it('applies a preset in its order, skipping unknown and repeated ids', () => {
+    const next = applyPreset(base, ['role', 'email', 'role', 'nope'], specs);
+    expect(next.order.slice(0, 2)).toEqual(['role', 'email']);
+    expect(next.visibility).toEqual({
+      name: false,
+      logins: false,
+      createdAt: false,
+      active: false,
+      team: false,
+    });
+    expect(next.sizing).toEqual({ email: 200 });
+  });
+
+  it('replaces a view with the same name, ignoring case and accents', () => {
+    const view = { name: 'Résumé', layout: base, query: { sort: [], filters: {}, search: '' } };
+    const other = { ...view, name: 'Other' };
+    const next = upsertView([view, other], { ...view, name: 'resume' });
+    expect(next.map((saved) => saved.name)).toEqual(['resume', 'Other']);
+    expect(upsertView([other], view).map((saved) => saved.name)).toEqual(['Other', 'Résumé']);
   });
 });

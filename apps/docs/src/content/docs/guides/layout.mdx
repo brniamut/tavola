@@ -1,17 +1,70 @@
 ---
 title: Layout and persistence
-description: Column picker, reordering, resizing, pinning, density, narrow screens and the saved layout.
+description: Column picker, presets, saved views, reordering, resizing, pinning, density, narrow screens and the saved layout.
 ---
 
 Users arrange the columns themselves:
 
-- **Show and hide** from the Columns button, which also holds the density setting and "Reset layout".
-- **Reorder** by dragging a header's grip, which appears on hover. Columns move within their region: pinned to the start, unpinned, or pinned to the end.
+- **Show, hide and order** in the column picker behind the Columns button. See below.
+- **Reorder** by dragging a header's grip, which appears on hover, or with the arrows in the column picker. Columns move within their region: pinned to the start, unpinned, or pinned to the end.
 - **Resize** by dragging a header's right edge. Double-click the edge to restore the default width.
 - **Pin and unpin** from a header's menu. Pinned columns stay in place while the table scrolls sideways; row actions always stay at the very end.
-- **Density**: compact, normal or comfortable rows.
+- **Density**: compact, normal or comfortable rows, from the button next to Columns.
 
 You set the starting point per column with `pin`, `hidden`, `size` and `defaultDensity`, and lock what users may change with `hideable`, `reorderable` and `resizable`.
+
+## The column picker
+
+The Columns button opens a dialog that lists every column in its current order, hidden ones included. Each row shows the column's group and why it behaves differently: always shown, pinned, or hidden because the table is too narrow. Users tick columns on and off, move them with the arrows (no dragging needed, so it works from the keyboard), search by header or group, and press Apply. Cancel or Escape drops the changes; "Restore defaults" goes back to the columns as you defined them.
+
+Give columns a `group` when a table has many of them. The picker shows it under the header and the search finds columns by it:
+
+```ts
+col.text('street', { group: 'Address' }),
+col.text('city', { group: 'Address' }),
+col.number('creditLimit', { group: 'Billing' }),
+```
+
+While columns are hidden, a line above the table says how many are visible, with a button that opens the picker. Turn it off with `columnSummary={false}`.
+
+### Presets
+
+Offer common column sets as one-click buttons. A preset shows its columns in the given order and hides the rest, except columns with `hideable: false`. An "All columns" button is always there.
+
+```tsx
+<DataTable
+  columnPresets={[
+    { label: 'Contact', columns: ['name', 'email', 'phone', 'city'] },
+    { label: 'Billing', columns: ['name', 'creditLimit', 'balance', 'paymentTerms'] },
+  ]}
+  /* ... */
+/>
+```
+
+### Saved views
+
+Users can save the current arrangement under a name and load it later. A view keeps the columns (order, visibility, pins, widths) and the current filters, sort and search, and opens on the first page. Saving under an existing name, ignoring case and accents, replaces that view.
+
+Where views are kept:
+
+- With an `id`, in `localStorage` under `tavola:<id>:views`.
+- With `views` and `onViewsChange`, wherever you keep them, for example per user on your server:
+
+```tsx
+const [views, setViews] = useState<SavedView[]>(initialViews);
+
+<DataTable
+  views={views}
+  onViewsChange={(next) => {
+    setViews(next);
+    saveViews(next);
+  }} /* ... */
+/>;
+```
+
+- With neither, the picker leaves out the save fields.
+
+A view saved before you changed the columns still loads: like the saved layout, it is checked against the current columns.
 
 ## Remembering the layout
 

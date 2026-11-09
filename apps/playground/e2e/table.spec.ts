@@ -127,3 +127,29 @@ test('keeps the server-mode query in the URL across a reload', async ({ page }) 
   await expect(page.getByRole('searchbox', { name: 'Search' })).toHaveValue('ada');
   await expect(page.getByText(/of 5000/)).toHaveCount(0);
 });
+
+test('arranges columns in the column picker, applied only on Apply', async ({ page }) => {
+  const open = async (): Promise<Locator> => {
+    await page.getByRole('button', { name: 'Columns', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Choose columns' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('searchbox', { name: 'Find a column' })).toBeFocused();
+    return dialog;
+  };
+  let dialog = await open();
+  await dialog.getByRole('checkbox', { name: 'Email' }).uncheck();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  expect(await headers(page)).toContain('Email');
+
+  dialog = await open();
+  await dialog.getByRole('checkbox', { name: 'Email' }).uncheck();
+  await dialog.getByRole('button', { name: 'Move up Status' }).click();
+  await expect(dialog.getByRole('button', { name: 'Move up Status' })).toBeFocused();
+  await dialog.getByRole('button', { name: 'Apply' }).click();
+  await expect(dialog).toBeHidden();
+  const order = await headers(page);
+  expect(order).not.toContain('Email');
+  expect(order.indexOf('Status')).toBeLessThan(order.indexOf('Role'));
+  await expect(page.getByRole('button', { name: 'Columns', exact: true })).toBeFocused();
+});

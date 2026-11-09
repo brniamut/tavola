@@ -4,10 +4,47 @@ export interface Locale {
   search: string;
   /** Button that opens the column picker. */
   columns: string;
-  /** Column picker: restore the default layout. */
+  /** Column picker: put the columns back as you defined them. */
   resetLayout: string;
-  /** Column picker: show every column. */
+  /** Column picker: the preset that shows every column. */
   showAll: string;
+  /** Column picker title. */
+  columnsTitle: string;
+  /** Column picker: the line under the title. */
+  columnsDescription: string;
+  /** Column picker: label of the preset buttons. */
+  presets: string;
+  /** Column picker: placeholder of the search box. */
+  findColumn: string;
+  /** Column picker: no column matches the search. */
+  noColumnsFound: string;
+  /** Column picker: a column that may not be hidden. */
+  alwaysShown: string;
+  /** Column picker: a column pinned to the start or end. */
+  pinnedStart: string;
+  pinnedEnd: string;
+  /** Column picker: a column that is on, but hidden because the table is too narrow. */
+  hiddenForSpace: string;
+  /** Column picker: labels of the arrow buttons; the column header follows. */
+  moveUp: string;
+  moveDown: string;
+  /** Column picker: save the view under this name. */
+  saveViewAs: string;
+  saveViewPlaceholder: string;
+  /** Column picker: the saved views. */
+  savedViews: string;
+  chooseView: string;
+  deleteView: string;
+  /** Column picker: what a view keeps. */
+  viewHint: string;
+  /** Dialog buttons. */
+  apply: string;
+  cancel: string;
+  close: string;
+  /** The line above the table while columns are hidden. */
+  columnSummary: (visible: number, total: number) => string;
+  /** Button in that line that opens the column picker. */
+  chooseColumns: string;
   /** Density menu label. */
   density: string;
   /** Density names. */

@@ -13,6 +13,12 @@ const CLIENT_ROWS = 500;
 /** Rows for the client-side example: everything in memory. */
 const USERS = generateUsers(CLIENT_ROWS);
 
+/** One-click column sets in the column picker. */
+const PRESETS = [
+  { label: 'Access review', columns: ['name', 'role', 'status', 'mfa', 'lastSeenAt'] },
+  { label: 'Contact', columns: ['name', 'email', 'team', 'country'] },
+];
+
 /** Lines kept in the event log. */
 const LOG_LINES = 6;
 
@@ -130,6 +136,7 @@ export function App(): ReactElement {
           ? { data: USERS, onQueryChange: (query) => note(`Query ${JSON.stringify(query)}`) }
           : { fetcher: fetchUsers, ...url })}
         bulkActions={actions}
+        columnPresets={PRESETS}
         toolbar={
           <button type="button" className="tv-button" onClick={() => note('Invite user')}>
             Invite user
